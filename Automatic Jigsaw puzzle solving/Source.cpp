@@ -12,6 +12,17 @@
 using namespace std;
 using namespace cv;
 
+Point findCentroid(vector<Point> contour)
+{
+	double x = 0, y = 0;
+	for (int i = 0; i < contour.size(); i++)
+	{
+		x += contour[i].x;
+		y += contour[i].y;
+	}
+	return Point((int)x / contour.size(), (int)y / contour.size());
+}
+
 int main()
 {
 	Mat img = imread("C:/Users/g11f0364/Desktop/Puzzles/BlackPuzzle.jpg");
@@ -51,7 +62,9 @@ int main()
 	//namedWindow("Erode Dialate Image 2");
 	//imshow("Erode Dialate Image 2", imgGrayScale);
 
-	findContours(imgGrayScale, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+	findContours(imgGrayScale, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
+	double averageAreaOfPiece = 0;
+
 
 	vector<vector<Point> > polyApprox(contours.size());
 	for (int i = 0; i< contours.size(); i++)
@@ -62,19 +75,34 @@ int main()
 		{
 			approxPolyDP(contours[i], polyApprox[i], 5.0, true);
 			drawContours(img, polyApprox, i, color, 2, 8, hierarchy, 0, Point());
+			averageAreaOfPiece += contourArea(contours[i]);
 		}	
 	}
+	averageAreaOfPiece = averageAreaOfPiece / contours.size();
 
-	for (int i = 0; i < polyApprox.size(); i++)
+	for (int i = 0; i < contours.size(); i++)
 	{
-		list<Point> potentialCorners;
+		list<Point> potentialCorners, trueCorners;
 		potentialCorners = utility_CornerIdentificaion::identifyCorners(polyApprox[i]);
+		vector<Point> potentialCornersV = { begin(potentialCorners), end(potentialCorners) };
+		Point centroid = findCentroid(contours[i]);
+		
+		trueCorners = utility_CornerIdentificaion::identifyTrueCorners(potentialCornersV, findCentroid(contours[i]), sqrt(averageAreaOfPiece));
+		
+		circle(img, centroid, 10, cvScalar(255, 0, 255),-1);
 
 		int numPotentialCorners = potentialCorners.size();
 		for (int j = 0; j < numPotentialCorners; j++)
 		{
 			circle(img, potentialCorners.front(), 10, cvScalar(0, 255, 255), 2, 8, 0);
 			potentialCorners.pop_front();
+		}
+
+		int numTrueCorners = trueCorners.size();
+		for (int j = 0; j < numTrueCorners; j++)
+		{
+			circle(img, trueCorners.front(), 10, cvScalar(255, 0, 255), 2, 8, 0);
+			trueCorners.pop_front();
 		}
 	}
 
