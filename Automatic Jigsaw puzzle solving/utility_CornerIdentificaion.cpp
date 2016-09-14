@@ -108,13 +108,13 @@ list<int> utility_CornerIdentificaion::findNextPotentialTrueCorners(vector<Point
 		gradient1Theta = gradient1Theta * 180.0 / CV_PI;
 		gradient2Theta = gradient2Theta * 180.0 / CV_PI;
 
-		if (!(abs(gradient1Theta - gradient2Theta) < 110 && abs(gradient1Theta - gradient2Theta) > 70))
+		if (!(abs(gradient1Theta - gradient2Theta) < 120 && abs(gradient1Theta - gradient2Theta) > 60))
 		{
 			cnr2Index = (cnr2Index + 1) % corners.size();
 			continue;
 		}
 		
-		candidates.push_front(cnr2Index); //cnr2 meets all requirements to be a corner, push it to list
+		candidates.push_back(cnr2Index); //cnr2 meets all requirements to be a corner, push it to list
 		cnr2Index = (cnr2Index + 1) % corners.size();
 	}
 	return candidates;
@@ -152,6 +152,12 @@ list<Point> utility_CornerIdentificaion::identifyTrueCorners(vector<Point> corne
 				{
 					cnr4Index = cnr4CandidatesIndex.front();
 					cnr4CandidatesIndex.pop_front();
+
+					bool cnr1check = corners[cnr1Index] == corners[cnr2Index] || corners[cnr1Index] == corners[cnr3Index] || corners[cnr1Index] == corners[cnr4Index];
+					bool cnr2check = corners[cnr2Index] == corners[cnr3Index] || corners[cnr2Index] == corners[cnr4Index];
+					bool cnr3check = corners[cnr3Index] == corners[cnr4Index];
+					if (cnr1check || cnr2check || cnr3check)
+						continue;
 
 					trueCorners.push_front(corners[cnr1Index]);
 					trueCorners.push_front(corners[cnr2Index]);

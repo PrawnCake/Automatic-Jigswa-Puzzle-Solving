@@ -3,7 +3,7 @@
 using namespace std;
 using namespace cv;
 
-enum EdgeType { STRAIGHT = 0, CONVEX = 1, CONCAVE = 2 };
+
 
 EdgeType edgetype;
 vector<Point> edgePoints;
@@ -13,8 +13,24 @@ Mat edgeStrip;
 
 Edge::Edge()
 {
+
 }
 
+Edge::Edge(vector<Point> e)
+{
+	edgePoints = e;
+}
+
+
+void Edge::calcChangeInAngles()
+{
+	//TODO
+}
+
+void Edge::lengthBetweenPoints()
+{
+	//TODO
+}
 
 Edge::~Edge()
 {
