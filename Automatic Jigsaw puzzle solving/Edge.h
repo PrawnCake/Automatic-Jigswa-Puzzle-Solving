@@ -19,7 +19,16 @@ public:
 	Edge(vector<Point> e);
 	Edge();
 	void calcChangeInAngles();
-	void lengthBetweenPoints();
+	void calcLengthBetweenPoints();
+	vector<Point> getContour();
+	void determineEdgeType();
+	EdgeType getEdgeType();
 	~Edge();
+private:
+	EdgeType edgetype;
+	vector<Point> edgePoints;
+	vector<double> changeInAngles;
+	vector<double> lengthBetweenPoints;
+	Mat edgeStrip;
 };
 

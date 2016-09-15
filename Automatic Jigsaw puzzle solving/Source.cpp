@@ -16,7 +16,9 @@ using namespace cv;
 
 Mat img;
 Mat edited;
-Piece * puzzle;
+list<Piece> puzzle;
+vector<Piece> puzzleV;
+
 
 Point findCentroid(vector<Point> contour)
 {
@@ -72,8 +74,7 @@ void getContoursAndCorners()
 	findContours(edited, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
 	
 	double averageAreaOfPiece = 0;
-	puzzle = new Piece[contours.size()];
-
+	
 	vector<vector<Point> > polyApprox(contours.size());
 	
 	for (int i = 0; i< contours.size(); i++)
@@ -85,10 +86,14 @@ void getContoursAndCorners()
 			approxPolyDP(contours[i], polyApprox[i], 5.0, true);
 			drawContours(img, polyApprox, i, color, 2, 8, hierarchy, 0, Point());
 			averageAreaOfPiece += contourArea(contours[i]);
+			Piece p;
+			puzzle.push_back(p);
 		}
 	}
 	averageAreaOfPiece = averageAreaOfPiece / contours.size();
 
+	puzzleV = { begin(puzzle), end(puzzle) };
+	
 	for (int i = 0; i < contours.size(); i++)
 	{
 		list<Point> potentialCorners, trueCorners;
@@ -99,17 +104,33 @@ void getContoursAndCorners()
 		trueCorners = utility_CornerIdentificaion::identifyTrueCorners(potentialCornersV, findCentroid(contours[i]), sqrt(averageAreaOfPiece));
 		vector<Point> trueCornersV = { begin(trueCorners), end(trueCorners) };
 
-		puzzle[i].createEdges(trueCornersV, contours[i]);
-
+		puzzleV[i].createEdges(trueCornersV, contours[i]);
 
 		circle(img, centroid, 10, cvScalar(255, 0, 255), -1);
-		putText(img, to_string(i), centroid, FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
+		
+		string word;
+		if (puzzleV[i].getPieceType() == INTERIOR)
+		{
+			word = "In";
+		}
+
+		else if (puzzleV[i].getPieceType() == CORNER)
+		{
+			word = "Cnr";
+		}
+
+		else if (puzzleV[i].getPieceType() == FRAME)
+		{
+			word = "Frm";
+		}
+		putText(img, to_string(i),centroid, FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
+		putText(img, word, Point(centroid.x-25,centroid.y-25), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
 
 		int numPotentialCorners = potentialCorners.size();
 		for (int j = 0; j < numPotentialCorners; j++)
 		{
-			circle(img, potentialCorners.front(), 10, cvScalar(0, 255, 255), 2, 8, 0);
-			putText(img, to_string(j), potentialCorners.front(), FONT_HERSHEY_SIMPLEX, 1, cvScalar(255, 255, 255));
+			//circle(img, potentialCorners.front(), 10, cvScalar(0, 255, 255), 2, 8, 0);
+			//putText(img, to_string(j), potentialCorners.front(), FONT_HERSHEY_SIMPLEX, 1, cvScalar(255, 255, 255));
 			potentialCorners.pop_front();
 
 		}
@@ -118,6 +139,7 @@ void getContoursAndCorners()
 		for (int j = 0; j < numTrueCorners; j++)
 		{
 			circle(img, trueCorners.front(), 10, cvScalar(255, 0, 255), 2, 8, 0);
+			putText(img, to_string(j), trueCorners.front(), FONT_HERSHEY_SIMPLEX, 1, cvScalar(255, 255, 255));
 			trueCorners.pop_front();
 		}
 	}
@@ -127,15 +149,29 @@ int main()
 {
 	initialise();
 	getContoursAndCorners();
-	
+
+
+	for (int i = 0; i < puzzleV.size(); i++)
+	{
+		Piece p = puzzleV[i];
+		for (int j = 0; j < 4; j++)
+		{
+			vector<Point> v = p.getEdge(j).getContour();
+			for (int k = 0; k < v.size()-1; k++)
+			{
+				line(img, Point(v[k].x, v[k].y), Point(v[(k + 1)].x, v[(k + 1)].y), Scalar(0,255,0), 2);
+			}
+		}
+	}
 
 	namedWindow("Contours");
 	imshow("Contours", img);
 
 	cvWaitKey(0); //wait for a key press
-
 	//cleaning up
 	cvDestroyAllWindows();
+
+	
 
 	return 0;
 }

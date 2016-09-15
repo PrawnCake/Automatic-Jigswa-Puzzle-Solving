@@ -58,7 +58,7 @@ list<Point> utility_CornerIdentificaion::identifyCorners(vector<Point> contours)
 
 		if (angle >= 90 - angleThreshold && angle <= 90 + angleThreshold)
 		{
-			potentialCorners.push_front(pt2);
+			potentialCorners.push_back(pt2);
 		}
 	}
 	return potentialCorners;
@@ -159,10 +159,10 @@ list<Point> utility_CornerIdentificaion::identifyTrueCorners(vector<Point> corne
 					if (cnr1check || cnr2check || cnr3check)
 						continue;
 
-					trueCorners.push_front(corners[cnr1Index]);
-					trueCorners.push_front(corners[cnr2Index]);
-					trueCorners.push_front(corners[cnr3Index]);
-					trueCorners.push_front(corners[cnr4Index]);
+					trueCorners.push_back(corners[cnr1Index]);
+					trueCorners.push_back(corners[cnr2Index]);
+					trueCorners.push_back(corners[cnr3Index]);
+					trueCorners.push_back(corners[cnr4Index]);
 					return trueCorners;
 				}
 			}

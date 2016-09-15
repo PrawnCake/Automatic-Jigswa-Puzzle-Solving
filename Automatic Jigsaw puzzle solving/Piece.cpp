@@ -1,21 +1,37 @@
 #include "Piece.h"
 
-
-
-Edge * edges = new Edge[4];
-Point centroid;
-PieceType type;
-int edgesInitialised = 0;
-
 using namespace std;
 
 Piece::Piece()
 {
 }
 
+PieceType Piece::getPieceType()
+{
+	return type;
+}
+
+void Piece::determinePieceType()
+{
+	int count = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		if (edges[i].getEdgeType() == STRAIGHT)
+			count++;
+	}
+	if (count == 1)
+		type = FRAME;
+	else if (count == 2)
+		type = CORNER;
+	else
+		type = INTERIOR;
+}
+
 void Piece::addEdge(Edge e)
 {
-	edges[edgesInitialised++] = e;
+	edges[edgesInitialised] = e;
+	edges[edgesInitialised].determineEdgeType();
+	edgesInitialised++;
 }
 
 void Piece::createEdges(vector<Point> corners, vector<Point> contours)
@@ -32,8 +48,8 @@ void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 			{
 				while (!(contours[j].x == corners[(i + 1) % 4].x && contours[j].y == corners[(i + 1) % 4].y))
 				{
-					j = (j + 1) % contours.size();
 					pointsOnEdge.push_back(contours[j]);
+					j = (j + 1) % contours.size();
 				}
 				pointsOnEdge.push_back(contours[j]);
 				break;
@@ -42,6 +58,7 @@ void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 		vector<Point> pointsOnEdgeV = { begin(pointsOnEdge), end(pointsOnEdge) };
 		addEdge(Edge(pointsOnEdgeV));
 	}
+	determinePieceType();
 }
 
 void Piece::setType(PieceType p)
