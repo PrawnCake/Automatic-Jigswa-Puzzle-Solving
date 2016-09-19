@@ -41,7 +41,7 @@ void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 
 	for (int i = 0; i < 4; i++)
 	{
-		list<Point> pointsOnEdge;
+		pointsOnEdge.clear();
 		for (int j = 0; j < contours.size(); j++)
 		{
 			if (contours[j].x == corners[i].x && contours[j].y == corners[i].y)
@@ -56,6 +56,7 @@ void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 			}
 		}
 		vector<Point> pointsOnEdgeV = { begin(pointsOnEdge), end(pointsOnEdge) };
+		approxPolyDP(pointsOnEdgeV, pointsOnEdgeV,5.0,false);
 		addEdge(Edge(pointsOnEdgeV));
 	}
 	determinePieceType();

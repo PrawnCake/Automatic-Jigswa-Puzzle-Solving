@@ -1,4 +1,5 @@
 #pragma once
+#include "utility_CornerIdentificaion.h"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <opencv2/opencv.hpp>
@@ -22,13 +23,13 @@ public:
 	void calcLengthBetweenPoints();
 	vector<Point> getContour();
 	void determineEdgeType();
+	vector<double> changeInAngles;
+	vector<double> lengthBetweenPoints;
 	EdgeType getEdgeType();
 	~Edge();
 private:
 	EdgeType edgetype;
 	vector<Point> edgePoints;
-	vector<double> changeInAngles;
-	vector<double> lengthBetweenPoints;
 	Mat edgeStrip;
 };
 

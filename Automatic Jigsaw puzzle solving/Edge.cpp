@@ -12,17 +12,71 @@ Edge::Edge()
 Edge::Edge(vector<Point> e)
 {
 	edgePoints = e;
+	calcChangeInAngles();
+	calcLengthBetweenPoints();
 }
 
 
 void Edge::calcChangeInAngles()
 {
-	//TODO
+	list<double> angles;
+
+	if (edgePoints.size() <= 2)
+	{
+		changeInAngles = { 0 };
+		return;
+	}
+		
+
+
+	for (int i = 0; i < edgePoints.size()-1; i++)
+	{
+		Point pt1 = edgePoints[i];
+		Point pt2 = edgePoints[i+1];
+		double gradientTheta;
+
+		if (pt1.x - pt2.x != 0.0)
+			gradientTheta = atan2(pt2.y - pt1.y, pt2.x - pt1.x);
+		else
+			gradientTheta = CV_PI / 2.0; //90 degrees
+
+		gradientTheta = gradientTheta * 180.0 / CV_PI;
+		if (gradientTheta < 0)
+			gradientTheta = 180 + gradientTheta;
+		angles.push_back(gradientTheta);
+	}
+	
+	list<double> changeInAnglesL;
+	double angle1;
+	double angle2;
+	
+	
+	angle1 = angles.front();
+	angles.pop_front();
+	angle2 = angles.front();
+	angles.pop_front();
+	
+	while (!angles.empty())
+	{
+		
+		changeInAnglesL.push_back((angle2 - angle1));
+
+		angle1 = angle2;
+		angle2 = angles.front();
+		angles.pop_front();
+	}
+	changeInAnglesL.push_back((angle2 - angle1));
+	changeInAngles = { begin(changeInAnglesL), end(changeInAnglesL) };
 }
 
 void Edge::calcLengthBetweenPoints()
 {
-	//TODO
+	list<double> distancesL;
+	for (int i = 0; i < edgePoints.size() - 1; i++)
+	{
+		distancesL.push_back((double)utility_CornerIdentificaion::euclideanDist(edgePoints[i], edgePoints[i+1]));
+	}
+	lengthBetweenPoints = { begin(distancesL), end(distancesL) };
 }
 
 void Edge::determineEdgeType()
@@ -44,9 +98,9 @@ void Edge::determineEdgeType()
 			maxDistance = fabs(distance);
 			maxPointIndex = i;
 			if (distance < 0)
-				side = 'C';
-			else
 				side = 'V';
+			else
+				side = 'C';
 		}
 	}
 	Point cnr1 = edgePoints[0];

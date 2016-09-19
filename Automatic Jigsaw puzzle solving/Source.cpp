@@ -8,7 +8,7 @@
 #include <iostream>
 #include "Piece.h"
 #include "Edge.h"
-
+#include "sequentialLocalMatching.h"
 #include "utility_CornerIdentificaion.h"
 
 using namespace std;
@@ -69,6 +69,7 @@ void initialise()
 void getContoursAndCorners()
 {
 	vector<vector<Point> > contours;
+	
 	vector<Vec4i> hierarchy;
 	
 	findContours(edited, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
@@ -76,7 +77,7 @@ void getContoursAndCorners()
 	double averageAreaOfPiece = 0;
 	
 	vector<vector<Point> > polyApprox(contours.size());
-	
+
 	for (int i = 0; i< contours.size(); i++)
 	{
 		Scalar color = Scalar(255, 255, 0);
@@ -84,7 +85,7 @@ void getContoursAndCorners()
 		if (fabs(contourArea(contours[i]))>100 && fabs(contourArea(contours[i])) < 500000)
 		{
 			approxPolyDP(contours[i], polyApprox[i], 5.0, true);
-			drawContours(img, polyApprox, i, color, 2, 8, hierarchy, 0, Point());
+			//drawContours(img, polyApprox, i, color, 2, 8, hierarchy, 0, Point());
 			averageAreaOfPiece += contourArea(contours[i]);
 			Piece p;
 			puzzle.push_back(p);
@@ -151,6 +152,18 @@ int main()
 	getContoursAndCorners();
 
 
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	for (int j = 0; j < 4; j++)
+	//	{
+	//		if (!(sequentialLocalMatching::localMatchShape(puzzleV[9].getEdge(i), puzzleV[7].getEdge(j)) == 500.0 || sequentialLocalMatching::localMatchShape(puzzleV[9].getEdge(i), puzzleV[7].getEdge(j)) == 600.0))
+	//			cout <<"Area of piece 9 edge " + to_string(i) +" and piece 7 edge "+ to_string(j) + ": " << sequentialLocalMatching::localMatchShape(puzzleV[9].getEdge(i),puzzleV[7].getEdge(j)) <<"\n";
+	//	}
+	//}
+	double num = sequentialLocalMatching::localMatchShape(puzzleV[0].getEdge(0), puzzleV[6].getEdge(2));
+	cout << "Area of piece 0 edge " + to_string(2) + " and piece 6 edge " + to_string(3) + ": " << num << "\n";
+	
+
 	for (int i = 0; i < puzzleV.size(); i++)
 	{
 		Piece p = puzzleV[i];
@@ -159,10 +172,28 @@ int main()
 			vector<Point> v = p.getEdge(j).getContour();
 			for (int k = 0; k < v.size()-1; k++)
 			{
-				line(img, Point(v[k].x, v[k].y), Point(v[(k + 1)].x, v[(k + 1)].y), Scalar(0,255,0), 2);
+//				line(img, Point(v[k].x, v[k].y), Point(v[(k + 1)].x, v[(k + 1)].y), Scalar(0,255,0), 2);
 			}
 		}
 	}
+
+	Piece p1 = puzzleV[0];
+	
+	vector<Point> v1 = p1.getEdge(0).getContour();
+	for (int k = 0; k < v1.size() - 1; k++)
+	{
+		line(img, Point(v1[k].x, v1[k].y), Point(v1[(k + 1)].x, v1[(k + 1)].y), Scalar(0,255,0), 2);
+	}
+	
+
+	Piece p2 = puzzleV[6];
+	
+	vector<Point> v2 = p2.getEdge(2).getContour();
+	for (int k = 0; k < v2.size() - 1; k++)
+	{
+		line(img, Point(v2[k].x, v2[k].y), Point(v2[(k + 1)].x, v2[(k + 1)].y), Scalar(0,255,0), 2);
+	}
+	
 
 	namedWindow("Contours");
 	imshow("Contours", img);

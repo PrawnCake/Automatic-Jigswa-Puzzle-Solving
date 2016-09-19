@@ -3,7 +3,7 @@
 using namespace std;
 using namespace cv;
 
-float utility_CornerIdentificaion::euclideanDist(Point& p, Point& q)
+double utility_CornerIdentificaion::euclideanDist(Point& p, Point& q)
 {
 	Point diff = p - q;
 	return cv::sqrt(diff.x*diff.x + diff.y*diff.y);
