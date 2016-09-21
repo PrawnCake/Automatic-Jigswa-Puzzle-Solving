@@ -9,8 +9,9 @@ Edge::Edge()
 
 }
 
-Edge::Edge(vector<Point> e)
+Edge::Edge(vector<Point> e, vector<Point> eActual )
 {
+	actualEdgePoints = eActual;
 	edgePoints = e;
 	calcChangeInAngles();
 	calcLengthBetweenPoints();
@@ -41,7 +42,7 @@ void Edge::calcChangeInAngles()
 			gradientTheta = CV_PI / 2.0; //90 degrees
 
 		gradientTheta = gradientTheta * 180.0 / CV_PI;
-		if (gradientTheta < 0)
+		//if (gradientTheta < 0)
 			gradientTheta = 180 + gradientTheta;
 		angles.push_back(gradientTheta);
 	}
@@ -145,6 +146,11 @@ EdgeType Edge::getEdgeType()
 vector<Point> Edge::getContour()
 {
 	return edgePoints;
+}
+
+vector<Point>Edge::getActualContour()
+{
+	return actualEdgePoints;
 }
 Edge::~Edge()
 {

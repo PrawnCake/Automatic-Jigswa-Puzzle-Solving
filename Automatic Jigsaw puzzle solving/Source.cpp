@@ -34,36 +34,36 @@ Point findCentroid(vector<Point> contour)
 void initialise()
 {
 	img = imread("C:/Users/g11f0364/Desktop/Puzzles/BlackPuzzle.jpg");
-	//namedWindow("Original");
-	//imshow("Original", img);
+	namedWindow("Original",WINDOW_NORMAL);
+	imshow("Original", img);
 
 	cvtColor(img, edited, CV_BGR2GRAY);
 
-	//namedWindow("GrayScale Image");
-	//imshow("GrayScale Image", imgGrayScale);
+	//namedWindow("GrayScale Image",WINDOW_NORMAL);
+	//imshow("GrayScale Image", edited);
 
-	threshold(edited, edited, 10, 255, THRESH_BINARY);
+	threshold(edited, edited, 15, 255, THRESH_BINARY);
 
-	//namedWindow("Threshold Image");
-	//imshow("Threshold Image", imgGrayScale);
+	//namedWindow("Threshold Image", WINDOW_NORMAL);
+	//imshow("Threshold Image", edited);
 
 	erode(edited, edited, Mat());
 	dilate(edited, edited, Mat());
 
-	//namedWindow("Erode Dialate Image");
-	//imshow("Erode Dialate Image", imgGrayScale);
+	//namedWindow("Erode Dialate Image", WINDOW_NORMAL);
+	//imshow("Erode Dialate Image", edited);
 
 	dilate(edited, edited, Mat());
 	erode(edited, edited, Mat());
 
-	//namedWindow("Dialate Erode Image");
-	//imshow("Dialate Erode Image", imgGrayScale);
+	//namedWindow("Dialate Erode Image", WINDOW_NORMAL);
+	//imshow("Dialate Erode Image", edited);
 
 	erode(edited, edited, Mat(), Point(-1, -1), 2);
 	dilate(edited, edited, Mat(), Point(-1, -1), 2);
 
-	//namedWindow("Erode Dialate Image 2");
-	//imshow("Erode Dialate Image 2", imgGrayScale);
+	//namedWindow("Erode Dialate Image 2", WINDOW_NORMAL);
+	//imshow("Erode Dialate Image 2", edited);
 }
 
 void getContoursAndCorners()
@@ -107,7 +107,7 @@ void getContoursAndCorners()
 
 		puzzleV[i].createEdges(trueCornersV, contours[i]);
 
-		circle(img, centroid, 10, cvScalar(255, 0, 255), -1);
+		//circle(img, centroid, 10, cvScalar(255, 0, 255), -1);
 		
 		string word;
 		if (puzzleV[i].getPieceType() == INTERIOR)
@@ -124,8 +124,8 @@ void getContoursAndCorners()
 		{
 			word = "Frm";
 		}
-		putText(img, to_string(i),centroid, FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
-		putText(img, word, Point(centroid.x-25,centroid.y-25), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
+		//putText(img, to_string(i),centroid, FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
+		//putText(img, word, Point(centroid.x-25,centroid.y-25), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
 
 		int numPotentialCorners = potentialCorners.size();
 		for (int j = 0; j < numPotentialCorners; j++)
@@ -139,8 +139,8 @@ void getContoursAndCorners()
 		int numTrueCorners = trueCorners.size();
 		for (int j = 0; j < numTrueCorners; j++)
 		{
-			circle(img, trueCorners.front(), 10, cvScalar(255, 0, 255), 2, 8, 0);
-			putText(img, to_string(j), trueCorners.front(), FONT_HERSHEY_SIMPLEX, 1, cvScalar(255, 255, 255));
+			//circle(img, trueCorners.front(), 10, cvScalar(255, 0, 255), 2, 8, 0);
+			//putText(img, to_string(j), trueCorners.front(), FONT_HERSHEY_SIMPLEX, 1, cvScalar(255, 255, 255));
 			trueCorners.pop_front();
 		}
 	}
@@ -150,19 +150,30 @@ int main()
 {
 	initialise();
 	getContoursAndCorners();
+	double min = 10000.0;
+	int piece;
+	int edge;
 
+	double d = sequentialLocalMatching::localMatchImage(puzzleV[9].getEdge(3), puzzleV[11].getEdge(1),img);
 
-	//for (int i = 0; i < 4; i++)
-	//{
-	//	for (int j = 0; j < 4; j++)
-	//	{
-	//		if (!(sequentialLocalMatching::localMatchShape(puzzleV[9].getEdge(i), puzzleV[7].getEdge(j)) == 500.0 || sequentialLocalMatching::localMatchShape(puzzleV[9].getEdge(i), puzzleV[7].getEdge(j)) == 600.0))
-	//			cout <<"Area of piece 9 edge " + to_string(i) +" and piece 7 edge "+ to_string(j) + ": " << sequentialLocalMatching::localMatchShape(puzzleV[9].getEdge(i),puzzleV[7].getEdge(j)) <<"\n";
-	//	}
-	//}
-	double num = sequentialLocalMatching::localMatchShape(puzzleV[0].getEdge(0), puzzleV[6].getEdge(2));
-	cout << "Area of piece 0 edge " + to_string(2) + " and piece 6 edge " + to_string(3) + ": " << num << "\n";
-	
+	for (int i = 1; i < puzzleV.size(); i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			double area = sequentialLocalMatching::localMatchShape(puzzleV[7].getEdge(3), puzzleV[i].getEdge(j));
+			cout << "Area of piece 7 edge " + to_string(3) + " and piece " << i <<" edge " + to_string(j) + ": " << area << "\n";
+			if (area < min)
+			{
+				min = area;
+				piece = i;
+				edge = j;
+			}
+		}
+	}
+	cout << "Piece: " << piece << " Edge: " << edge << endl;
+	//double num = sequentialLocalMatching::localMatchShape(puzzleV[0].getEdge(0), puzzleV[6].getEdge(2));
+	//cout << "Area of piece 0 edge " + to_string(2) + " and piece 6 edge " + to_string(3) + ": " << num << "\n";
+	//
 
 	for (int i = 0; i < puzzleV.size(); i++)
 	{

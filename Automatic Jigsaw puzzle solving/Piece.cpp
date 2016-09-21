@@ -56,8 +56,9 @@ void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 			}
 		}
 		vector<Point> pointsOnEdgeV = { begin(pointsOnEdge), end(pointsOnEdge) };
-		approxPolyDP(pointsOnEdgeV, pointsOnEdgeV,5.0,false);
-		addEdge(Edge(pointsOnEdgeV));
+		vector<Point> actualPointsOnEdgeV = { begin(pointsOnEdge), end(pointsOnEdge) };
+		approxPolyDP(pointsOnEdgeV, pointsOnEdgeV,2.5,false);
+		addEdge(Edge(pointsOnEdgeV, actualPointsOnEdgeV));
 	}
 	determinePieceType();
 }
