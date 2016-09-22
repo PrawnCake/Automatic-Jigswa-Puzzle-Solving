@@ -124,7 +124,7 @@ void getContoursAndCorners()
 		{
 			word = "Frm";
 		}
-		//putText(img, to_string(i),centroid, FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
+		putText(img, to_string(i),centroid, FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
 		//putText(img, word, Point(centroid.x-25,centroid.y-25), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
 
 		int numPotentialCorners = potentialCorners.size();
@@ -154,14 +154,14 @@ int main()
 	int piece;
 	int edge;
 
-	double d = sequentialLocalMatching::localMatchImage(puzzleV[9].getEdge(3), puzzleV[11].getEdge(1),img);
+	double d = sequentialLocalMatching::localMatchImage(puzzleV[11].getEdge(1), puzzleV[9].getEdge(3),img);
 
 	for (int i = 1; i < puzzleV.size(); i++)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			double area = sequentialLocalMatching::localMatchShape(puzzleV[7].getEdge(3), puzzleV[i].getEdge(j));
-			cout << "Area of piece 7 edge " + to_string(3) + " and piece " << i <<" edge " + to_string(j) + ": " << area << "\n";
+			double area = sequentialLocalMatching::localMatchShape(puzzleV[11].getEdge(1), puzzleV[i].getEdge(j));
+			cout << "Area of piece 11 edge " + to_string(1) + " and piece " << i <<" edge " + to_string(j) + ": " << area << "\n";
 			if (area < min)
 			{
 				min = area;
@@ -187,24 +187,6 @@ int main()
 			}
 		}
 	}
-
-	Piece p1 = puzzleV[0];
-	
-	vector<Point> v1 = p1.getEdge(0).getContour();
-	for (int k = 0; k < v1.size() - 1; k++)
-	{
-		line(img, Point(v1[k].x, v1[k].y), Point(v1[(k + 1)].x, v1[(k + 1)].y), Scalar(0,255,0), 2);
-	}
-	
-
-	Piece p2 = puzzleV[6];
-	
-	vector<Point> v2 = p2.getEdge(2).getContour();
-	for (int k = 0; k < v2.size() - 1; k++)
-	{
-		line(img, Point(v2[k].x, v2[k].y), Point(v2[(k + 1)].x, v2[(k + 1)].y), Scalar(0,255,0), 2);
-	}
-	
 
 	namedWindow("Contours");
 	imshow("Contours", img);

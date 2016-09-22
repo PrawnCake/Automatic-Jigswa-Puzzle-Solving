@@ -114,12 +114,20 @@ void Edge::determineEdgeType()
 	if (cnr1.x - cnr2.x != 0.0)
 		gradientBetweenCorners = atan((double)(cnr1.y - cnr2.y) / (double)(cnr1.x - cnr2.x));
 	else
+
 		gradientBetweenCorners = CV_PI / 2.0; //90 degrees
+	if (cnr1.y > cnr2.y)
+		gradientBetweenCorners = -gradientBetweenCorners;
 
 	if (cnr1.x - pointOfMaxDistance.x != 0.0)
 		gradientCnr1ToPoint = atan((double)(cnr1.y - pointOfMaxDistance.y) / (double)(cnr1.x - pointOfMaxDistance.x));
 	else
+	{
 		gradientCnr1ToPoint = CV_PI / 2.0; //90 degrees
+		if (cnr1.y > pointOfMaxDistance.y)
+			gradientBetweenCorners = -gradientBetweenCorners;
+	}
+		
 
 
 	double angleDiff = fabs(gradientBetweenCorners - gradientCnr1ToPoint) * 180.0 / CV_PI;

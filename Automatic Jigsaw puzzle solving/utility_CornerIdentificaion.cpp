@@ -3,6 +3,31 @@
 using namespace std;
 using namespace cv;
 
+double utility_CornerIdentificaion::findAngleBetween(Point pt1, Point pt2)
+{
+	double angle=0.0;
+	if (pt1.x - pt2.x != 0.0)
+		angle = atan((double)(pt1.y - pt2.y) / (double)(pt1.x - pt2.x));
+	else
+		angle = CV_PI / 2.0; //90 degrees
+	return angle;
+}
+
+double utility_CornerIdentificaion::findGradient(Point pt1, Point pt2)
+{
+	double gradient = 0.0;
+	if (pt1.x - pt2.x != 0.0)
+		gradient = atan2(pt2.y - pt1.y, pt2.x - pt1.x);
+	else
+	{
+		gradient = CV_PI / 2.0; //90 degrees
+		if (pt1.y > pt2.y)
+			gradient = -gradient;
+	}
+	return gradient;
+		
+}
+
 double utility_CornerIdentificaion::euclideanDist(Point& p, Point& q)
 {
 	Point diff = p - q;
@@ -18,7 +43,7 @@ list<Point> utility_CornerIdentificaion::identifyCorners(vector<Point> contours)
 	double gradient1Theta = 0;
 	double gradient2Theta = 0;
 	double angle;
-	double angleThreshold = 20;
+	double angleThreshold = 30;
 
 	for (int i = 0; i < contours.size(); i++)
 	{
@@ -37,22 +62,11 @@ list<Point> utility_CornerIdentificaion::identifyCorners(vector<Point> contours)
 			pt3 = contours[1];
 		else
 			pt3 = contours[i + 2];
-
-
-
-		if (pt1.x - pt2.x != 0.0)
-			gradient1Theta = atan((pt1.y - pt2.y) / (pt1.x - pt2.x));
-		else
-			gradient1Theta = CV_PI / 2.0; //90 degrees
-
-
-
-		if (pt2.x - pt3.x != 0.0)
-			gradient2Theta = atan((pt2.y - pt3.y) / (pt2.x - pt3.x));
-		else
-			gradient2Theta = CV_PI / 2.0; //90 degrees
-
-
+		
+		gradient1Theta = findAngleBetween(pt1, pt2);
+		
+		
+		gradient2Theta = findAngleBetween(pt2, pt3);
 
 		angle = fabs(gradient2Theta - gradient1Theta) * 180.0 / CV_PI;
 
@@ -95,16 +109,10 @@ list<int> utility_CornerIdentificaion::findNextPotentialTrueCorners(vector<Point
 
 		//check gradient between lines is +- 90 degrees
 		double gradient1Theta, gradient2Theta;
-		if (cnr1.x - centroid.x != 0.0)
-			gradient1Theta = atan((double)(cnr1.y - centroid.y) / (double)(cnr1.x - centroid.x));
-		else
-			gradient1Theta = CV_PI / 2.0;
-
-		if (cnr2.x - centroid.x != 0.0)
-			gradient2Theta = atan((double)(cnr2.y - centroid.y) / (double)(cnr2.x - centroid.x));
-		else
-			gradient2Theta = CV_PI / 2.0;
-
+		
+		gradient1Theta = findAngleBetween(cnr1,centroid);
+		gradient2Theta = findAngleBetween(cnr2, centroid);
+		
 		gradient1Theta = gradient1Theta * 180.0 / CV_PI;
 		gradient2Theta = gradient2Theta * 180.0 / CV_PI;
 

@@ -17,6 +17,8 @@ public:
 	static list<Point> identifyCorners(vector<Point> contours);
 	static list<Point> identifyTrueCorners(vector<Point> corners, Point centroid, int approxWidth);
 	static double euclideanDist(Point& p, Point& q);
+	static double findGradient(Point pt1, Point pt2);
+	static double findAngleBetween(Point pt1, Point pt2);
 private:
 	static list<int> findNextPotentialTrueCorners(vector<Point> corners, Point centroid, int initialPointIndex, int approxWidth);
 };
