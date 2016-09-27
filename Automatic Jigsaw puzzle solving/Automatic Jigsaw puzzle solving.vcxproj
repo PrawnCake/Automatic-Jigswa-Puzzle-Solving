@@ -44,7 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(OPENCV_DIR)\..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENCV_DIR)\..\..\include;$(OPENCV_DIR)\..\..\dlib-19.1</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -70,7 +70,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\..\opencv3.0\opencv\build\dlib-19.1\dlib\all\source.cpp" />
     <ClCompile Include="Edge.cpp" />
+    <ClCompile Include="globalAlgorithm.cpp" />
     <ClCompile Include="Piece.cpp" />
     <ClCompile Include="sequentialLocalMatching.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -78,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Edge.h" />
+    <ClInclude Include="globalAlgorithm.h" />
     <ClInclude Include="Piece.h" />
     <ClInclude Include="sequentialLocalMatching.h" />
     <ClInclude Include="utility_CornerIdentificaion.h" />

@@ -18,7 +18,7 @@ class sequentialLocalMatching
 {
 public:
 	static double localMatchShape(Edge e1, Edge e2);
-	static double localMatchImage(Edge e1, Edge e2, Mat img);
+	static double localMatchImage(Edge e1, Edge e2);
 	
 };
 

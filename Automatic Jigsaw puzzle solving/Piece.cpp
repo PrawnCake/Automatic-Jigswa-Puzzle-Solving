@@ -2,8 +2,10 @@
 
 using namespace std;
 
-Piece::Piece()
+Piece::Piece(Mat img, int id)
 {
+	pieceID = id;
+	image = img;
 }
 
 PieceType Piece::getPieceType()
@@ -34,6 +36,11 @@ void Piece::addEdge(Edge e)
 	edgesInitialised++;
 }
 
+void Piece::setEdge(Edge e, int index)
+{
+	edges[index] = e;
+}
+
 void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 {
 
@@ -58,7 +65,7 @@ void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 		vector<Point> pointsOnEdgeV = { begin(pointsOnEdge), end(pointsOnEdge) };
 		vector<Point> actualPointsOnEdgeV = { begin(pointsOnEdge), end(pointsOnEdge) };
 		approxPolyDP(pointsOnEdgeV, pointsOnEdgeV,2.5,false);
-		addEdge(Edge(pointsOnEdgeV, actualPointsOnEdgeV));
+		addEdge(Edge(pointsOnEdgeV, actualPointsOnEdgeV, image));
 	}
 	determinePieceType();
 }

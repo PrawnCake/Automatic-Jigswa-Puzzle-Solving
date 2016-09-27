@@ -10,6 +10,8 @@
 #include "Edge.h"
 #include "sequentialLocalMatching.h"
 #include "utility_CornerIdentificaion.h"
+#include "globalAlgorithm.h"
+#include <dlib/optimization/max_cost_assignment.h>"
 
 using namespace std;
 using namespace cv;
@@ -87,7 +89,7 @@ void getContoursAndCorners()
 			approxPolyDP(contours[i], polyApprox[i], 5.0, true);
 			//drawContours(img, polyApprox, i, color, 2, 8, hierarchy, 0, Point());
 			averageAreaOfPiece += contourArea(contours[i]);
-			Piece p;
+			Piece p(img,i);
 			puzzle.push_back(p);
 		}
 	}
@@ -135,14 +137,6 @@ void getContoursAndCorners()
 			potentialCorners.pop_front();
 
 		}
-
-		int numTrueCorners = trueCorners.size();
-		for (int j = 0; j < numTrueCorners; j++)
-		{
-			//circle(img, trueCorners.front(), 10, cvScalar(255, 0, 255), 2, 8, 0);
-			//putText(img, to_string(j), trueCorners.front(), FONT_HERSHEY_SIMPLEX, 1, cvScalar(255, 255, 255));
-			trueCorners.pop_front();
-		}
 	}
 }
 
@@ -150,43 +144,96 @@ int main()
 {
 	initialise();
 	getContoursAndCorners();
+	globalAlgorithm::alignCornerPieces(puzzleV);
+	globalAlgorithm::alignFramePieces(puzzleV);
+
+	for (int i = 0; i < puzzleV.size(); i++)
+		for (int j = 0; j < 4; j++)
+		{
+			putText(img, to_string(j), puzzleV[i].getEdge(j).getActualContour()[0], FONT_HERSHEY_SIMPLEX, 1, cvScalar(255, 255, 255));
+		}
+
+	dlib::matrix<int> matrix = globalAlgorithm::generateScoreMatrixForFramePieces(puzzleV);
+
+	vector<long> assignment = dlib::max_cost_assignment(matrix);
+
+	for (int i = 0; i < 10; i++)
+	{
+		cout << i <<": "<< assignment[i] << endl;
+	}
+	
+
 	double min = 10000.0;
 	int piece;
 	int edge;
 
-	double d = sequentialLocalMatching::localMatchImage(puzzleV[11].getEdge(1), puzzleV[9].getEdge(3),img);
+	int maxMatch;
+	int maxMatchPieceIndex;
+	int maxMatchEdgeIndex;
+	
+	//for (int k = 0; k < puzzleV.size(); k++)
+	//{
+	//	for (int l = 0; l < 4; l++)
+	//	{
+	//		maxMatch = 0;
+	//		maxMatchPieceIndex = 0;
+	//		maxMatchEdgeIndex = 0;
 
-	for (int i = 1; i < puzzleV.size(); i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			double area = sequentialLocalMatching::localMatchShape(puzzleV[11].getEdge(1), puzzleV[i].getEdge(j));
-			cout << "Area of piece 11 edge " + to_string(1) + " and piece " << i <<" edge " + to_string(j) + ": " << area << "\n";
-			if (area < min)
-			{
-				min = area;
-				piece = i;
-				edge = j;
-			}
-		}
-	}
-	cout << "Piece: " << piece << " Edge: " << edge << endl;
-	//double num = sequentialLocalMatching::localMatchShape(puzzleV[0].getEdge(0), puzzleV[6].getEdge(2));
-	//cout << "Area of piece 0 edge " + to_string(2) + " and piece 6 edge " + to_string(3) + ": " << num << "\n";
-	//
+	//		if (puzzleV[k].getEdge(l).getEdgeType() == STRAIGHT)
+	//			continue;
+	//		for (int i = 0; i < puzzleV.size(); i++)
+	//		{
+	//			if (i == k)
+	//				continue;
+	//			for (int j = 0; j < 4; j++)
+	//			{
+	//				if (puzzleV[i].getEdge(j).getEdgeType() == STRAIGHT)
+	//					continue;
+	//				double score = sequentialLocalMatching::localMatchImage(puzzleV[k].getEdge(l), puzzleV[i].getEdge(j), img);
+	//				if (score > maxMatch)
+	//				{
+	//					maxMatch = score;
+	//					maxMatchPieceIndex = i;
+	//					maxMatchEdgeIndex = j;
+	//				}
+	//			}
+	//		}
+	//		cout << "Piece : "<< k << " Edge: "<< l << " is best matched to Piece: " << maxMatchPieceIndex << " Edge: " << maxMatchEdgeIndex << endl;
+	//	}
+	//}
 
-	for (int i = 0; i < puzzleV.size(); i++)
-	{
-		Piece p = puzzleV[i];
-		for (int j = 0; j < 4; j++)
-		{
-			vector<Point> v = p.getEdge(j).getContour();
-			for (int k = 0; k < v.size()-1; k++)
-			{
-//				line(img, Point(v[k].x, v[k].y), Point(v[(k + 1)].x, v[(k + 1)].y), Scalar(0,255,0), 2);
-			}
-		}
-	}
+
+//	for (int i = 1; i < puzzleV.size(); i++)
+//	{
+//		for (int j = 0; j < 4; j++)
+//		{
+//			double area = sequentialLocalMatching::localMatchShape(puzzleV[11].getEdge(1), puzzleV[i].getEdge(j));
+//			cout << "Area of piece 11 edge " + to_string(1) + " and piece " << i <<" edge " + to_string(j) + ": " << area << "\n";
+//			if (area < min)
+//			{
+//				min = area;
+//				piece = i;
+//				edge = j;
+//			}
+//		}
+//	}
+//	cout << "Piece: " << piece << " Edge: " << edge << endl;
+//	//double num = sequentialLocalMatching::localMatchShape(puzzleV[0].getEdge(0), puzzleV[6].getEdge(2));
+//	//cout << "Area of piece 0 edge " + to_string(2) + " and piece 6 edge " + to_string(3) + ": " << num << "\n";
+//	//
+//
+//	for (int i = 0; i < puzzleV.size(); i++)
+//	{
+//		Piece p = puzzleV[i];
+//		for (int j = 0; j < 4; j++)
+//		{
+//			vector<Point> v = p.getEdge(j).getContour();
+//			for (int k = 0; k < v.size()-1; k++)
+//			{
+////				line(img, Point(v[k].x, v[k].y), Point(v[(k + 1)].x, v[(k + 1)].y), Scalar(0,255,0), 2);
+//			}
+//		}
+//	}
 
 	namedWindow("Contours");
 	imshow("Contours", img);

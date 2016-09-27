@@ -9,14 +9,96 @@ Edge::Edge()
 
 }
 
-Edge::Edge(vector<Point> e, vector<Point> eActual )
+Edge::Edge(vector<Point> e, vector<Point> eActual, Mat img)
 {
 	actualEdgePoints = eActual;
 	edgePoints = e;
 	calcChangeInAngles();
 	calcLengthBetweenPoints();
+	computeEdgeStrip(img);
 }
 
+Mat Edge::getEdgeStrip()
+{
+	return edgeStrip;
+}
+
+
+void Edge::computeEdgeStrip(Mat img)
+{
+	Mat imgCopy;
+	img.copyTo(imgCopy);
+	int pixelDepth = 3;
+	int yIncrement = 0;
+	vector<Point> contour = actualEdgePoints;
+	Mat edgeImage(contour.size(), pixelDepth, CV_8UC3, Scalar(255, 255, 255));
+	for (int m = 0; m < contour.size() - 1; m++)
+	{
+		Point pt1 = contour[m];
+		Point pt2 = contour[m + 1];
+		double gradientTheta;
+		gradientTheta = utility_CornerIdentificaion::findGradient(pt1, pt2);
+
+		float uCol = (float)sin(-gradientTheta);
+		float vCol = (float)cos(-gradientTheta);
+		float uRow = vCol;
+		float vRow = -uCol;
+
+		float startu = pt1.x;
+		float startv = pt1.y;
+
+		for (int i = 0; i < pixelDepth; i++)
+		{
+			float u = startu - uCol;
+			float v = startv - vCol;
+
+
+			for (int j = 0; j < (int)utility_CornerIdentificaion::euclideanDist(pt1, pt2); j++)
+			{
+				edgeImage.at<Vec3b>(Point(i, j + yIncrement)) = imgCopy.at<Vec3b>(Point(u, v));
+				//imgCopy.at<Vec3b>(Point(u, v)) = Vec3b(0, 255, 255);
+				//increment u and v by the row vectors
+				u += uRow;
+				v += vRow;
+
+			}
+			//increment rowu and rowv by column vectors
+			startu -= uCol;
+			startv -= vCol;
+
+		}
+		yIncrement += (int)utility_CornerIdentificaion::euclideanDist(pt1, pt2);
+	}
+	imshow("area scanned",imgCopy);
+
+	int r = 0;
+	int g = 0;
+	int b = 0;
+
+	for (int i = 0; i < edgeImage.rows; i++)
+	{
+		for (int j = 0; j < pixelDepth; j++)
+		{
+			b += edgeImage.at<Vec3b>(Point(j, i))[0];
+			g += edgeImage.at<Vec3b>(Point(j, i))[1];
+			r += edgeImage.at<Vec3b>(Point(j, i))[2];
+		}
+		b = b / pixelDepth;
+		g = g / pixelDepth;
+		r = r / pixelDepth;
+
+		for (int j = 0; j < pixelDepth; j++)
+		{
+			edgeImage.at<Vec3b>(Point(j, i))[0] = b;
+			edgeImage.at<Vec3b>(Point(j, i))[1] = g;
+			edgeImage.at<Vec3b>(Point(j, i))[2] = r;
+		}
+		b = 0;
+		g = 0;
+		r = 0;
+	}
+	edgeImage.copyTo(edgeStrip);
+}
 
 void Edge::calcChangeInAngles()
 {

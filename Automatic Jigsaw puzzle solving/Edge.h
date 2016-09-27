@@ -17,7 +17,7 @@ enum EdgeType { STRAIGHT = 0, CONVEX = 1, CONCAVE = 2 };
 class Edge
 {
 public:
-	Edge(vector<Point> e, vector<Point> eActual);
+	Edge(vector<Point> e, vector<Point> eActual, Mat img);
 	Edge();
 	void calcChangeInAngles();
 	void calcLengthBetweenPoints();
@@ -26,7 +26,9 @@ public:
 	void determineEdgeType();
 	vector<double> changeInAngles;
 	vector<double> lengthBetweenPoints;
+	void computeEdgeStrip(Mat img);
 	EdgeType getEdgeType();
+	Mat getEdgeStrip();
 	~Edge();
 private:
 	EdgeType edgetype;
