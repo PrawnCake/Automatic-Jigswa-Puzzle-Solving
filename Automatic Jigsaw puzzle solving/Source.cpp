@@ -108,7 +108,7 @@ void getContoursAndCorners()
 		vector<Point> trueCornersV = { begin(trueCorners), end(trueCorners) };
 
 		puzzleV[i].createEdges(trueCornersV, contours[i]);
-
+		puzzleV[i].setCentroid(centroid);
 		//circle(img, centroid, 10, cvScalar(255, 0, 255), -1);
 		
 		string word;
@@ -142,26 +142,104 @@ void getContoursAndCorners()
 
 int main()
 {
+	dlib::matrix<Piece> solvedPuzzle(4,4);
 	initialise();
 	getContoursAndCorners();
-	globalAlgorithm::alignCornerPieces(puzzleV);
-	globalAlgorithm::alignFramePieces(puzzleV);
+	globalAlgorithm::solvePuzzle(puzzleV, img);
 
-	for (int i = 0; i < puzzleV.size(); i++)
-		for (int j = 0; j < 4; j++)
-		{
-			putText(img, to_string(j), puzzleV[i].getEdge(j).getActualContour()[0], FONT_HERSHEY_SIMPLEX, 1, cvScalar(255, 255, 255));
-		}
 
-	dlib::matrix<int> matrix = globalAlgorithm::generateScoreMatrixForFramePieces(puzzleV);
-
-	vector<long> assignment = dlib::max_cost_assignment(matrix);
-
-	for (int i = 0; i < 10; i++)
-	{
-		cout << i <<": "<< assignment[i] << endl;
-	}
+	//for (int i = 0; i < puzzleV.size(); i++)
+	//{
+	//	for (int j = 0; j < 4; j++)
+	//	{
+	//		putText(img, to_string(j), puzzleV[i].getEdge(j).getActualContour()[0], FONT_HERSHEY_SIMPLEX, 1, cvScalar(255, 255, 255));
+	//	}
+	//}
 	
+	//list<Piece> framePiecesL;
+	//for (int i = 0; i < puzzleV.size(); i++)
+	//{
+	//	if (puzzleV[i].getPieceType() != INTERIOR)
+	//		framePiecesL.push_back(puzzleV[i]);
+	//}
+
+	//vector<Piece> framePieces = { begin(framePiecesL), end(framePiecesL) };
+	//dlib::matrix<int> matrix = globalAlgorithm::generateScoreMatrixForFramePieces(framePieces);
+
+	//vector<long> optimalAssignment = dlib::max_cost_assignment(matrix);
+
+	//
+	////place frame pieces
+	//int changeX = 0;
+	//int changeY = -1;
+	//int x = 0;
+	//int y = 0;
+	//int firstCornerIndex;
+	//for (int i = 0; i < framePieces.size(); i++) // find first corner
+	//{
+	//	if (framePieces[i].getPieceType() == CORNER)
+	//	{
+	//		firstCornerIndex = i;
+	//		break;
+	//	}
+	//}
+
+	//int index = firstCornerIndex;
+	//do
+	//{
+	//	solvedPuzzle(x, y) = framePieces[index];
+
+	//	if (framePieces[index].getPieceType() == CORNER) // change direction
+	//	{
+	//		if (changeX == 0 && changeY == -1)
+	//		{
+	//			changeX = 1;
+	//			changeY = 0;
+	//		}
+	//		else if (changeX == 1 && changeY == 0)
+	//		{
+	//			changeX = 0;
+	//			changeY = 1;
+	//		}
+	//		else if (changeX == 0 && changeY == 1)
+	//		{
+	//			changeX = -1;
+	//			changeY = 0;
+	//		}
+	//		else if (changeX == -1 && changeY == 0)
+	//		{
+	//			changeX = 0;
+	//			changeY = -1;
+	//		}
+	//	}
+
+	//	index = optimalAssignment[index];
+	//	x += changeX;
+	//	y += changeY;
+	//} 
+	//while (index != firstCornerIndex);
+	//
+	//int singleBlockDimention = 260;
+	//Mat completePuzzleGrid(singleBlockDimention*4, singleBlockDimention*4, CV_8UC3, Scalar(255, 255, 255));
+
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	Point startOfBlock;
+	//	for (int j = 0; j < 4; j++)
+	//	{
+	//		if (!solvedPuzzle(i, j).isInitialised)
+	//			continue;
+	//		startOfBlock.x = solvedPuzzle(i, j).getCentroid().x - 130;
+	//		startOfBlock.y = solvedPuzzle(i, j).getCentroid().y - 130;
+	//		if (startOfBlock.x < 0)
+	//			startOfBlock.x = 0;
+	//		if (startOfBlock.y < 0)
+	//			startOfBlock.y = 0;
+	//		
+	//		img(Rect(startOfBlock.x, startOfBlock.y, 260, 260)).copyTo(completePuzzleGrid(Rect(i*singleBlockDimention, j*singleBlockDimention, singleBlockDimention, singleBlockDimention)));
+	//	}
+	//}
+	//imshow("final", completePuzzleGrid);
 
 	double min = 10000.0;
 	int piece;

@@ -75,16 +75,16 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 	
 	e1.getEdgeStrip().copyTo(edgeSideBySide(Rect(0, 0, e1.getEdgeStrip().cols, e1.getEdgeStrip().rows)));
 	flip(e2.getEdgeStrip(), edgeSideBySide(Rect(e1.getEdgeStrip().cols, 0, e2.getEdgeStrip().cols, e2.getEdgeStrip().rows)), 0);
-	
-	namedWindow("sup", WINDOW_NORMAL);
-	namedWindow("gray", WINDOW_NORMAL);
-	namedWindow("singlePixel", WINDOW_NORMAL);
-	namedWindow("singlePixelResult", WINDOW_NORMAL);
-	namedWindow("beforegray", WINDOW_NORMAL);
+	//
+	//namedWindow("sup", WINDOW_NORMAL);
+	//namedWindow("gray", WINDOW_NORMAL);
+	//namedWindow("singlePixel", WINDOW_NORMAL);
+	//namedWindow("singlePixelResult", WINDOW_NORMAL);
+	//namedWindow("beforegray", WINDOW_NORMAL);
 
-	imshow("beforegray", edgeSideBySide);
+	//imshow("beforegray", edgeSideBySide);
 	cvtColor(edgeSideBySide, edgeSideBySide, CV_BGR2GRAY);
-	imshow("gray", edgeSideBySide);
+	//imshow("gray", edgeSideBySide);
 	
 	
 	int paletIndex = 4;
@@ -123,7 +123,7 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 			}
 		}
 	}
-	imshow("singlePixel", singlePixelComparison);
+	//imshow("singlePixel", singlePixelComparison);
 	
 	
 	//Score match
@@ -193,8 +193,8 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 	
 	
 	
-	imshow("sup", edgeSideBySide);
-	imshow("singlePixelResult", result);
+	//imshow("sup", edgeSideBySide);
+	//imshow("singlePixelResult", result);
 
 	return score;
 }

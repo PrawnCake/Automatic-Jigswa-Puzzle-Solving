@@ -2,6 +2,11 @@
 
 using namespace std;
 
+Piece::Piece()
+{
+	isInitialised = false;
+}
+
 Piece::Piece(Mat img, int id)
 {
 	pieceID = id;
@@ -44,6 +49,7 @@ void Piece::setEdge(Edge e, int index)
 void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 {
 
+	fullContour = contours;
 	list<Point> pointsOnEdge;
 
 	for (int i = 0; i < 4; i++)
@@ -78,6 +84,11 @@ void Piece::setType(PieceType p)
 void Piece::setCentroid(Point c)
 {
 	centroid = c;
+}
+
+Point Piece::getCentroid()
+{
+	return centroid;
 }
 
 Edge Piece::getEdge(int i)

@@ -11,10 +11,20 @@ public:
 	void setEdge(Edge e, int index);
 	void setType(PieceType p);
 	void setCentroid(Point c);
+	Point getCentroid();
 	void createEdges(vector<Point> corners, vector<Point> contours);
 	PieceType getPieceType();
 	Edge getEdge(int i);
 	int pieceID;
+	vector<Point> fullContour;
+	bool isInitialised = true;
+	
+	Edge left;
+	Edge right;
+	Edge up;
+	Edge down;
+	
+	Piece();
 	~Piece();
 private:
 	Mat image;
