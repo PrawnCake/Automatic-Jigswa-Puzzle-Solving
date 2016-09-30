@@ -5,6 +5,59 @@ int length = 3;
 int bredth = 4;
 dlib::matrix<Piece> solvedPuzzle(length, bredth);
 
+
+void placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex, vector<Point> pockets)
+{
+	vector<int> indexOfBestMatchedPiecePerPocket(scores.size());
+	vector<double> ratioOfBestMatchedPiecePerPocket(scores.size());
+
+	//find the best piece per pocket, i = pocket, j = piece (note 4 orientations per piece)
+	for (int i = 0; i < scores.size(); i++)
+	{
+		double bestScore = 0;
+		double secondBestScore = 0;
+		int bestScoreIndex = 0;
+
+		
+		for (int j = 0; j < scores[i].size(); j++)
+		{
+			if (scores[i][j] > bestScore)
+			{
+				secondBestScore = bestScore;
+				bestScore = scores[i][j];
+				bestScoreIndex = j;
+			}
+		}
+		if (secondBestScore == 0)
+		{
+			for (int j = 0; j < scores[i].size(); j++)
+			{
+				if (scores[i][j] > secondBestScore && scores[i][j] != bestScore)
+				{
+					secondBestScore = scores[i][j];
+				}
+			}
+		}
+		indexOfBestMatchedPiecePerPocket[i] = bestScoreIndex;
+		ratioOfBestMatchedPiecePerPocket[i] = bestScore / secondBestScore;
+	}
+
+	int highestRatio = 0;
+	int pocketWithHighestRatioIndex = 0;
+	int indexOfPieceWithinPocket = 0;
+	for (int i = 0; i < indexOfBestMatchedPiecePerPocket.size(); i++)
+	{
+		if (ratioOfBestMatchedPiecePerPocket[i] > highestRatio)
+		{
+			highestRatio = ratioOfBestMatchedPiecePerPocket[i];
+			pocketWithHighestRatioIndex = i;
+			indexOfPieceWithinPocket = indexOfBestMatchedPiecePerPocket[i];
+		}
+	}
+	//TODO: WORK OUT WHICH DAMN PIECE AND ITS ORIENTATION ARE PLACED
+	Piece p;
+}
+
 Edge getTheEdge(Piece thePiece, int edge)
 {
 	if (thePiece.getPieceType() == FRAME)
@@ -176,24 +229,25 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 		{
 			pocketScores[i] = vector<double>(interiorPieces.size());
 		}
-		
+		vector<int> edgesToMatchIndex;
 		for (int i = 0; i<twoSidePockets.size(); i++)
 		{
 			Point pocket = twoSidePockets[i];
 
 			//this is used to determine which edges (in terms of up down left right) are matched, as currently the orientation of the interior piece relative to the frame is unknown
-			vector<int> edgesToMatchIndex = getNeighbouringEdgesIndex2(pocket); 
+			edgesToMatchIndex = getNeighbouringEdgesIndex2(pocket); 
 
 			for (int j = 0; j < interiorPieces.size(); j++)
 			{
 				for (int k = 0; k < 4; k++)
 				{
-					matchTwoEdges(interiorPieces[j].getEdge(k), interiorPieces[j].getEdge((k + 1) % 4), edgesToMatchIndex, pocket);
+					pocketScores[i][j*4+k] = matchTwoEdges(interiorPieces[j].getEdge(k), interiorPieces[j].getEdge((k + 1) % 4), edgesToMatchIndex, pocket);
 				}
 			}
 		}
-	}
 
+		placeBestPiece(pocketScores, edgesToMatchIndex, twoSidePockets);
+	}
 }
 
 dlib::matrix<int> generateScoreMatrixForFramePieces(vector<Piece> framePieces)
