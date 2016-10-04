@@ -1,12 +1,12 @@
 #include "globalAlgorithm.h"
 using namespace std;
 
-int length = 3;
-int bredth = 4;
+int length = 10;
+int bredth = 10;
 dlib::matrix<Piece> solvedPuzzle(length, bredth);
 
 
-void placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex, vector<Point> pockets)
+int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex, vector<Point> pockets, vector<Piece> pieces)
 {
 	vector<int> indexOfBestMatchedPiecePerPocket(scores.size());
 	vector<double> ratioOfBestMatchedPiecePerPocket(scores.size());
@@ -44,18 +44,55 @@ void placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex
 
 	int highestRatio = 0;
 	int pocketWithHighestRatioIndex = 0;
-	int indexOfPieceWithinPocket = 0;
+	int indexOfPiece = 0;
 	for (int i = 0; i < indexOfBestMatchedPiecePerPocket.size(); i++)
 	{
 		if (ratioOfBestMatchedPiecePerPocket[i] > highestRatio)
 		{
 			highestRatio = ratioOfBestMatchedPiecePerPocket[i];
 			pocketWithHighestRatioIndex = i;
-			indexOfPieceWithinPocket = indexOfBestMatchedPiecePerPocket[i];
+			indexOfPiece = indexOfBestMatchedPiecePerPocket[i];
 		}
 	}
-	//TODO: WORK OUT WHICH DAMN PIECE AND ITS ORIENTATION ARE PLACED
-	Piece p;
+	//Place piece
+	Piece p = pieces[indexOfPiece/4];
+	int orientation = indexOfPiece % 4;
+	solvedPuzzle(pockets[pocketWithHighestRatioIndex].x, pockets[pocketWithHighestRatioIndex].y) = p;
+
+	//orientate Piece
+	if (edgesToMatchIndex[0] == 0)
+	{
+		p.down	= p.getEdge(orientation);
+		p.right = p.getEdge((orientation + 1) % 4);
+		p.up	= p.getEdge((orientation + 2) % 4);
+		p.left	= p.getEdge((orientation + 3) % 4);
+	}
+
+	else if (edgesToMatchIndex[0] == 1)
+	{
+		p.right = p.getEdge(orientation);
+		p.up	= p.getEdge((orientation + 1) % 4);
+		p.left	= p.getEdge((orientation + 2) % 4);
+		p.down	= p.getEdge((orientation + 3) % 4);
+	}
+
+	else if (edgesToMatchIndex[0] == 2)
+	{
+		p.up	= p.getEdge(orientation);
+		p.left	= p.getEdge((orientation + 1) % 4);
+		p.down	= p.getEdge((orientation + 2) % 4);
+		p.right	= p.getEdge((orientation + 3) % 4);
+	}
+
+	else if (edgesToMatchIndex[0] == 3)
+	{
+		p.left	= p.getEdge(orientation);
+		p.down	= p.getEdge((orientation + 1) % 4);
+		p.right = p.getEdge((orientation + 2) % 4);
+		p.up	= p.getEdge((orientation + 3) % 4);
+	}
+
+	return indexOfPiece / 4;
 }
 
 Edge getTheEdge(Piece thePiece, int edge)
@@ -101,7 +138,42 @@ double matchTwoEdges(Edge e1, Edge e2, vector<int> edgesToMatch, Point pocket)
 		secondEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y + 1), 0);
 	}
 
-	return sequentialLocalMatching::localMatchShape(e1, firstEdge) + sequentialLocalMatching::localMatchShape(e2, secondEdge);
+	return 5000 - (sequentialLocalMatching::localMatchShape(e1, firstEdge) + sequentialLocalMatching::localMatchShape(e2, secondEdge));
+}
+
+double matchThreeEdges(Edge e1, Edge e2, Edge e3, vector<int> edgesToMatch, Point pocket)
+{
+	Edge firstEdge, secondEdge, thirdEdge;
+
+	if (edgesToMatch[0] == 0 && edgesToMatch[1] == 1 && edgesToMatch[2] == 2)
+	{
+		firstEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y + 1), 0);
+		secondEdge	= getTheEdge(solvedPuzzle(pocket.x + 1, pocket.y), 1);
+		thirdEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y - 1), 2);
+	}
+
+	else if (edgesToMatch[0] == 1 && edgesToMatch[1] == 2 && edgesToMatch[2] == 3)
+	{
+		firstEdge	= getTheEdge(solvedPuzzle(pocket.x + 1, pocket.y), 1);
+		secondEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y - 1), 2);
+		thirdEdge	= getTheEdge(solvedPuzzle(pocket.x - 1, pocket.y), 3);
+	}
+
+	else if (edgesToMatch[0] == 2 && edgesToMatch[1] == 3 && edgesToMatch[2] == 4)
+	{
+		firstEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y - 1), 2);
+		secondEdge	= getTheEdge(solvedPuzzle(pocket.x - 1, pocket.y), 3);
+		thirdEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y + 1), 0);
+	}
+
+	else if (edgesToMatch[0] == 3 && edgesToMatch[1] == 0 && edgesToMatch[2] == 3)
+	{
+		firstEdge	= getTheEdge(solvedPuzzle(pocket.x - 1, pocket.y), 3);
+		secondEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y + 1), 0);
+		thirdEdge	= getTheEdge(solvedPuzzle(pocket.x + 1, pocket.y), 1);
+	}
+
+	return 5000 - (sequentialLocalMatching::localMatchShape(e1, firstEdge) + sequentialLocalMatching::localMatchShape(e2, secondEdge) + sequentialLocalMatching::localMatchShape(e3, thirdEdge));
 }
 
 vector<int> getNeighbouringEdgesIndex2(Point pocket)
@@ -130,8 +202,8 @@ vector<int> getNeighbouringEdgesIndex2(Point pocket)
 		return vector<int> {1, 2};
 	}
 
-	p1 = solvedPuzzle(pocket.x - 1, pocket.y);
-	p2 = solvedPuzzle(pocket.x, pocket.y - 1);
+	p1 = solvedPuzzle(pocket.x, pocket.y - 1);
+	p2 = solvedPuzzle(pocket.x - 1, pocket.y);
 
 	if (p1.isInitialised && p2.isInitialised)
 	{
@@ -139,30 +211,46 @@ vector<int> getNeighbouringEdgesIndex2(Point pocket)
 	}
 }
 
-//vector<Edge> getNeighbouringEdgesIndex3(Point pocket)
-//{
-//	//find the empty edge
-//
-//	vector<Edge> edges(3);
-//	if (!solvedPuzzle(pocket.x - 1, pocket.y).isInitialised) //missing piece is on left
-//	{
-//		//edges[0] = getLeftEdgeFromNeightbour();
-//		//edges[1] = getEdgeFromNeightbour();
-//		//edges[2] = getEdgeFromNeightbour();
-//	}
-//	else if (!solvedPuzzle(pocket.x, pocket.y + 1).isInitialised) // missing piece is below
-//	{
-//
-//	}
-//	else if (!solvedPuzzle(pocket.x + 1, pocket.y).isInitialised) // missing piece is right
-//	{
-//
-//	}
-//	else if (!solvedPuzzle(pocket.x, pocket.y - 1).isInitialised) //missing piece is above
-//	{
-//
-//	}
-//}
+vector<int> getNeighbouringEdgesIndex3(Point pocket)
+{
+	Piece p1 = solvedPuzzle(pocket.x - 1, pocket.y);
+	Piece p2 = solvedPuzzle(pocket.x, pocket.y + 1);
+	Piece p3 = solvedPuzzle(pocket.x + 1, pocket.y);
+
+	if (p1.isInitialised && p2.isInitialised)
+	{
+		return vector<int> {3, 0, 1};
+	}
+
+	p1 = solvedPuzzle(pocket.x, pocket.y + 1);
+	p2 = solvedPuzzle(pocket.x + 1, pocket.y);
+	p3 = solvedPuzzle(pocket.x, pocket.y - 1);
+
+
+	if (p1.isInitialised && p2.isInitialised)
+	{
+		return vector<int> {0, 1, 2};
+	}
+
+	p1 = solvedPuzzle(pocket.x + 1, pocket.y);
+	p2 = solvedPuzzle(pocket.x, pocket.y - 1);
+	p3 = solvedPuzzle(pocket.x - 1, pocket.y);
+
+	if (p1.isInitialised && p2.isInitialised)
+	{
+		return vector<int> {1, 2, 3};
+	}
+
+	p1 = solvedPuzzle(pocket.x, pocket.y - 1);
+	p2 = solvedPuzzle(pocket.x - 1, pocket.y);
+	p3 = solvedPuzzle(pocket.x, pocket.y + 1);
+
+	if (p1.isInitialised && p2.isInitialised)
+	{
+		return vector<int> {2, 3, 0};
+	}
+}
+
 
 vector<vector<Point>> findAllPockets()
 {
@@ -176,6 +264,8 @@ vector<vector<Point>> findAllPockets()
 			int neighbourCount = 0;
 			if (!solvedPuzzle(i, j).isInitialised)
 			{
+				if (i - 1 < 0 || i + 1 >= length || j - 1 < 0 || j + 1 >= bredth)
+					continue;
 				neighbourCount =
 					solvedPuzzle(i - 1, j).isInitialised +
 					solvedPuzzle(i + 1, j).isInitialised +
@@ -197,56 +287,76 @@ vector<vector<Point>> findAllPockets()
 
 void placeInteriorPieces(vector<Piece> interiorPieces)
 {
-	vector<vector<Point>> allPockets = findAllPockets();
-
-	vector<Point> fourSidePockets = allPockets[0];
-	vector<Point> threeSidePockets = allPockets[1];
-	vector<Point> twoSidePockets = allPockets[2];
-
-	if (fourSidePockets.size() > 0) //last piece to be placed
+	while (interiorPieces.size() > 0)
 	{
-		//TODO
-		return;
-	}
+		vector<vector<Point>> allPockets = findAllPockets();
 
-	else if (threeSidePockets.size() > 0) //last piece to be placed
-	{
-		//vector<vector<double>> pocketScores(threeSidePockets.size());
-		//
-		//for (int i = 0; i<threeSidePockets.size(); i++)
-		//{
-		//	Point pocket = threeSidePockets[i];
-		//	vector<Edge> edgesToMatch = getNeighbouringEdges3(pocket);
-		//}
-
-
-	}
-
-	else if (twoSidePockets.size() > 0) //last piece to be placed
-	{
-		vector<vector<double>> pocketScores(twoSidePockets.size());
-		for (int i = 0; i < twoSidePockets.size(); i++)
+		vector<Point> fourSidePockets = allPockets[0];
+		vector<Point> threeSidePockets = allPockets[1];
+		vector<Point> twoSidePockets = allPockets[2];
+	
+		if (fourSidePockets.size() > 0) //last piece to be placed
 		{
-			pocketScores[i] = vector<double>(interiorPieces.size());
+			//TODO
+			solvedPuzzle(fourSidePockets[0].x, fourSidePockets[0].y) = interiorPieces[0];
+			interiorPieces.erase(interiorPieces.begin());
+			return;
 		}
-		vector<int> edgesToMatchIndex;
-		for (int i = 0; i<twoSidePockets.size(); i++)
+
+		else if (threeSidePockets.size() > 0)
 		{
-			Point pocket = twoSidePockets[i];
-
-			//this is used to determine which edges (in terms of up down left right) are matched, as currently the orientation of the interior piece relative to the frame is unknown
-			edgesToMatchIndex = getNeighbouringEdgesIndex2(pocket); 
-
-			for (int j = 0; j < interiorPieces.size(); j++)
+			vector<vector<double>> pocketScores(threeSidePockets.size());
+			for (int i = 0; i < threeSidePockets.size(); i++)
 			{
-				for (int k = 0; k < 4; k++)
+				pocketScores[i] = vector<double>(interiorPieces.size() * 4);
+			}
+			vector<int> edgesToMatchIndex;
+			for (int i = 0; i < threeSidePockets.size(); i++)
+			{
+				Point pocket = threeSidePockets[i];
+
+				//this is used to determine which edges (in terms of up down left right) are matched, as currently the orientation of the interior piece relative to the frame is unknown
+				edgesToMatchIndex = getNeighbouringEdgesIndex3(pocket);
+
+				for (int j = 0; j < interiorPieces.size(); j++)
 				{
-					pocketScores[i][j*4+k] = matchTwoEdges(interiorPieces[j].getEdge(k), interiorPieces[j].getEdge((k + 1) % 4), edgesToMatchIndex, pocket);
+					for (int k = 0; k < 4; k++)
+					{
+						pocketScores[i][j * 4 + k] = matchThreeEdges(interiorPieces[j].getEdge(k), interiorPieces[j].getEdge((k + 1) % 4), interiorPieces[j].getEdge((k + 2) % 4), edgesToMatchIndex, pocket);
+					}
 				}
 			}
+
+			int piecePlacedIndex = placeBestPiece(pocketScores, edgesToMatchIndex, threeSidePockets, interiorPieces);
+			interiorPieces.erase(interiorPieces.begin() + piecePlacedIndex);
 		}
 
-		placeBestPiece(pocketScores, edgesToMatchIndex, twoSidePockets);
+		else if (twoSidePockets.size() > 0)
+		{
+			vector<vector<double>> pocketScores(twoSidePockets.size());
+			for (int i = 0; i < twoSidePockets.size(); i++)
+			{
+				pocketScores[i] = vector<double>(interiorPieces.size() * 4);
+			}
+			vector<int> edgesToMatchIndex;
+			for (int i = 0; i < twoSidePockets.size(); i++)
+			{
+				Point pocket = twoSidePockets[i];
+
+				//this is used to determine which edges (in terms of up down left right) are matched, as currently the orientation of the interior piece relative to the frame is unknown
+				edgesToMatchIndex = getNeighbouringEdgesIndex2(pocket);
+
+				for (int j = 0; j < interiorPieces.size(); j++)
+				{
+					for (int k = 0; k < 4; k++)
+					{
+						pocketScores[i][j * 4 + k] = matchTwoEdges(interiorPieces[j].getEdge(k), interiorPieces[j].getEdge((k + 1) % 4), edgesToMatchIndex, pocket);
+					}
+				}
+			}
+
+			placeBestPiece(pocketScores, edgesToMatchIndex, twoSidePockets, interiorPieces);
+		}
 	}
 }
 
@@ -287,9 +397,10 @@ dlib::matrix<int> generateScoreMatrixForFramePieces(vector<Piece> framePieces)
 			}
 
 
-			double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2);
-			//double imageScore = 1000 - sequentialLocalMatching::localMatchImage(e1, e2);
-			double imageScore = 0;
+			//double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2);
+			double shapeScore = 0;
+			double imageScore = 1000 - sequentialLocalMatching::localMatchImage(e1, e2);
+			//double imageScore = 0;
 			matrix(i, j) = 5000 - (int)(shapeScore + imageScore);
 		}
 	}
@@ -437,16 +548,16 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 	vector<Piece> interiorPieces = { begin(interiorPiecesL), end(interiorPiecesL) };
 
 	placeFramePieces(framePieces);
-	placeInteriorPieces(interiorPieces);
+	//placeInteriorPieces(interiorPieces);
 	
 	
 	int singleBlockDimention = 260;
-	Mat completePuzzleGrid(singleBlockDimention * 4, singleBlockDimention * 4, CV_8UC3, Scalar(255, 255, 255));
+	Mat completePuzzleGrid(singleBlockDimention * (bredth), singleBlockDimention * (length), CV_8UC3, Scalar(255, 255, 255));
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < length; i++)
 	{
 		Point startOfBlock;
-		for (int j = 0; j < 4; j++)
+		for (int j = 0; j < bredth; j++)
 		{
 			if (!solvedPuzzle(i, j).isInitialised)
 				continue;

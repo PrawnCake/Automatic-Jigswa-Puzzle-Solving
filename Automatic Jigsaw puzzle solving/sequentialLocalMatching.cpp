@@ -67,6 +67,7 @@ double sequentialLocalMatching::localMatchShape(Edge e1, Edge e2)
 double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 {
 	int longestApprox;
+
 	if (e1.getEdgeStrip().rows > e2.getEdgeStrip().rows)
 		longestApprox = e1.getEdgeStrip().rows;
 	else
@@ -141,17 +142,20 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 	Mat result(edgeSideBySide.rows, 1, CV_8UC3, Scalar(255,255,255));
 	
 	//check to see if the most occuring bin is significant in the comparison
-	if (mostOccuringBinIndex1 == mostOccuringBinIndex2 && (paletBinEdge1[mostOccuringBinIndex1] > singlePixelComparison.rows *0.5 || paletBinEdge1[mostOccuringBinIndex2] > singlePixelComparison.rows *0.5))
+	if (mostOccuringBinIndex1 == mostOccuringBinIndex2 && (paletBinEdge1[mostOccuringBinIndex1] > singlePixelComparison.rows *0.5 && paletBinEdge1[mostOccuringBinIndex2] > singlePixelComparison.rows *0.5))
 		mostOccuringBinSignificant = true;
 	int score = 0;
-	int bestMatch, goodMatch, averageMatch, badMatch;
+	int bestMatch,		//same bin, pixel match on non significant bin
+		goodMatch,		//same bin, pixel match on significant bin
+		averageMatch,	//differs by 1 bin
+		badMatch;		// differs by more than 1 bin
 
 	if (mostOccuringBinSignificant)
 	{
-		bestMatch = 7;
+		bestMatch = 9;
 		goodMatch = 3;
 		averageMatch = 2;
-		badMatch = 0;
+		badMatch = -5;
 	}
 
 	if (!mostOccuringBinSignificant)
@@ -159,7 +163,7 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 		bestMatch = 2;
 		goodMatch = 2;
 		averageMatch = 1;
-		badMatch = 0;
+		badMatch = -5;
 	}
 		
 	for (int i = 0; i < singlePixelComparison.rows; i++)
