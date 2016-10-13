@@ -5,12 +5,12 @@ double sequentialLocalMatching::localMatchShape(Edge e1, Edge e2)
 {
 	Mat edgeSideBySide(1000, 1000, CV_8UC3, Scalar(0, 0, 0));
 
-	if (e1.getEdgeType() == e2.getEdgeType() ) //edge types are the same, dont match
+	if (e1.edgetype == e2.edgetype ) //edge types are the same, dont match
 		return 10000.0;
-	int pixelDiff = e1.getContour().size() - e2.getContour().size();
+	int pixelDiff = e1.edgePoints.size() - e2.edgePoints.size();
 	//cout << "Pixel count difference: " << e1.getContour().size() << " " << e2.getContour().size() << " " << pixelDiff << "\n";
 	
-	if (e1.getEdgeType() == STRAIGHT || e2.getEdgeType() == STRAIGHT )
+	if (e1.edgetype == STRAIGHT || e2.edgetype == STRAIGHT )
 		return 20000.0;
 
 	double areaDifference=0;
@@ -68,14 +68,14 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 {
 	int longestApprox;
 
-	if (e1.getEdgeStrip().rows > e2.getEdgeStrip().rows)
-		longestApprox = e1.getEdgeStrip().rows;
+	if (e1.edgeStrip.rows > e2.edgeStrip.rows)
+		longestApprox = e1.edgeStrip.rows;
 	else
-		longestApprox = e2.getEdgeStrip().rows;
-	Mat edgeSideBySide(longestApprox, e1.getEdgeStrip().cols * 2, CV_8UC3, Scalar(255, 255, 255));
+		longestApprox = e2.edgeStrip.rows;
+	Mat edgeSideBySide(longestApprox, e1.edgeStrip.cols * 2, CV_8UC3, Scalar(255, 255, 255));
 	
-	e1.getEdgeStrip().copyTo(edgeSideBySide(Rect(0, 0, e1.getEdgeStrip().cols, e1.getEdgeStrip().rows)));
-	flip(e2.getEdgeStrip(), edgeSideBySide(Rect(e1.getEdgeStrip().cols, 0, e2.getEdgeStrip().cols, e2.getEdgeStrip().rows)), 0);
+	e1.edgeStrip.copyTo(edgeSideBySide(Rect(0, 0, e1.edgeStrip.cols, e1.edgeStrip.rows)));
+	flip(e2.edgeStrip, edgeSideBySide(Rect(e1.edgeStrip.cols, 0, e2.edgeStrip.cols, e2.edgeStrip.rows)), 0);
 	//
 	//namedWindow("sup", WINDOW_NORMAL);
 	//namedWindow("gray", WINDOW_NORMAL);

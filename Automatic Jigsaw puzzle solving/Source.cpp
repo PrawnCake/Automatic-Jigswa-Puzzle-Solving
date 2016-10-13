@@ -108,21 +108,21 @@ void getContoursAndCorners()
 		vector<Point> trueCornersV = { begin(trueCorners), end(trueCorners) };
 
 		puzzleV[i].createEdges(trueCornersV, contours[i]);
-		puzzleV[i].setCentroid(centroid);
+		puzzleV[i].centroid = centroid;
 		//circle(img, centroid, 10, cvScalar(255, 0, 255), -1);
 		
 		string word;
-		if (puzzleV[i].getPieceType() == INTERIOR)
+		if (puzzleV[i].type == INTERIOR)
 		{
 			word = "In";
 		}
 
-		else if (puzzleV[i].getPieceType() == CORNER)
+		else if (puzzleV[i].type == CORNER)
 		{
 			word = "Cnr";
 		}
 
-		else if (puzzleV[i].getPieceType() == FRAME)
+		else if (puzzleV[i].type == FRAME)
 		{
 			word = "Frm";
 		}

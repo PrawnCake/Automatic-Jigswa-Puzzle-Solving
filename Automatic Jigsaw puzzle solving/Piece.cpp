@@ -13,17 +13,13 @@ Piece::Piece(Mat img, int id)
 	image = img;
 }
 
-PieceType Piece::getPieceType()
-{
-	return type;
-}
 
 void Piece::determinePieceType()
 {
 	int count = 0;
 	for (int i = 0; i < 4; i++)
 	{
-		if (edges[i].getEdgeType() == STRAIGHT)
+		if (edges[i].edgetype == STRAIGHT)
 			count++;
 	}
 	if (count == 1)
@@ -41,10 +37,6 @@ void Piece::addEdge(Edge e)
 	edgesInitialised++;
 }
 
-void Piece::setEdge(Edge e, int index)
-{
-	edges[index] = e;
-}
 
 void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 {
@@ -76,25 +68,6 @@ void Piece::createEdges(vector<Point> corners, vector<Point> contours)
 	determinePieceType();
 }
 
-void Piece::setType(PieceType p)
-{
-	type = p;
-}
-
-void Piece::setCentroid(Point c)
-{
-	centroid = c;
-}
-
-Point Piece::getCentroid()
-{
-	return centroid;
-}
-
-Edge Piece::getEdge(int i)
-{
-	return edges[i];
-}
 
 Piece::~Piece()
 {

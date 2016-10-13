@@ -62,34 +62,34 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 	//orientate Piece
 	if (edgesToMatchIndex[0] == 0)
 	{
-		p.down	= p.getEdge(orientation);
-		p.right = p.getEdge((orientation + 1) % 4);
-		p.up	= p.getEdge((orientation + 2) % 4);
-		p.left	= p.getEdge((orientation + 3) % 4);
+		p.down	= p.edges[orientation];
+		p.right = p.edges[(orientation + 1) % 4];
+		p.up	= p.edges[(orientation + 2) % 4];
+		p.left	= p.edges[(orientation + 3) % 4];
 	}
 
 	else if (edgesToMatchIndex[0] == 1)
 	{
-		p.right = p.getEdge(orientation);
-		p.up	= p.getEdge((orientation + 1) % 4);
-		p.left	= p.getEdge((orientation + 2) % 4);
-		p.down	= p.getEdge((orientation + 3) % 4);
+		p.right = p.edges[orientation];
+		p.up	= p.edges[(orientation + 1) % 4];
+		p.left	= p.edges[(orientation + 2) % 4];
+		p.down	= p.edges[(orientation + 3) % 4];
 	}
 
 	else if (edgesToMatchIndex[0] == 2)
 	{
-		p.up	= p.getEdge(orientation);
-		p.left	= p.getEdge((orientation + 1) % 4);
-		p.down	= p.getEdge((orientation + 2) % 4);
-		p.right	= p.getEdge((orientation + 3) % 4);
+		p.up	= p.edges[orientation];
+		p.left	= p.edges[(orientation + 1) % 4];
+		p.down	= p.edges[(orientation + 2) % 4];
+		p.right = p.edges[(orientation + 3) % 4];
 	}
 
 	else if (edgesToMatchIndex[0] == 3)
 	{
-		p.left	= p.getEdge(orientation);
-		p.down	= p.getEdge((orientation + 1) % 4);
-		p.right = p.getEdge((orientation + 2) % 4);
-		p.up	= p.getEdge((orientation + 3) % 4);
+		p.left	= p.edges[orientation];
+		p.down	= p.edges[(orientation + 1) % 4];
+		p.right = p.edges[(orientation + 2) % 4];
+		p.up	= p.edges[(orientation + 3) % 4];
 	}
 
 	return indexOfPiece / 4;
@@ -97,8 +97,8 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 
 Edge getTheEdge(Piece thePiece, int edge)
 {
-	if (thePiece.getPieceType() == FRAME)
-		return thePiece.getEdge(2);
+	if (thePiece.type == FRAME)
+		return thePiece.edges[2];
 	
 	if (edge == 0)
 		return thePiece.up;
@@ -322,7 +322,7 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 				{
 					for (int k = 0; k < 4; k++)
 					{
-						pocketScores[i][j * 4 + k] = matchThreeEdges(interiorPieces[j].getEdge(k), interiorPieces[j].getEdge((k + 1) % 4), interiorPieces[j].getEdge((k + 2) % 4), edgesToMatchIndex, pocket);
+						pocketScores[i][j * 4 + k] = matchThreeEdges(interiorPieces[j].edges[k], interiorPieces[j].edges[(k + 1) % 4], interiorPieces[j].edges[(k + 2) % 4], edgesToMatchIndex, pocket);
 					}
 				}
 			}
@@ -350,7 +350,7 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 				{
 					for (int k = 0; k < 4; k++)
 					{
-						pocketScores[i][j * 4 + k] = matchTwoEdges(interiorPieces[j].getEdge(k), interiorPieces[j].getEdge((k + 1) % 4), edgesToMatchIndex, pocket);
+						pocketScores[i][j * 4 + k] = matchTwoEdges(interiorPieces[j].edges[k], interiorPieces[j].edges[(k + 1) % 4], edgesToMatchIndex, pocket);
 					}
 				}
 			}
@@ -376,21 +376,21 @@ dlib::matrix<int> generateScoreMatrixForFramePieces(vector<Piece> framePieces)
 			}
 
 			Edge e1;
-			if (framePieces[i].getPieceType() == FRAME)
+			if (framePieces[i].type == FRAME)
 			{
-				e1 = framePieces[i].getEdge(3);
+				e1 = framePieces[i].edges[3];
 			}
-			else if (framePieces[i].getPieceType() == CORNER)
+			else if (framePieces[i].type == CORNER)
 			{
-				e1 = framePieces[i].getEdge(2);
+				e1 = framePieces[i].edges[2];
 			}
 
-			Edge e2 = framePieces[j].getEdge(1);
+			Edge e2 = framePieces[j].edges[1];
 
 
 
 
-			if (e1.getEdgeType() == e2.getEdgeType())
+			if (e1.edgetype == e2.edgetype)
 			{
 				matrix(i, j) = 0;
 				continue;
@@ -420,7 +420,7 @@ void placeFramePieces(vector<Piece> framePieces)
 	int firstCornerIndex;
 	for (int i = 0; i < framePieces.size(); i++) // find first corner
 	{
-		if (framePieces[i].getPieceType() == CORNER)
+		if (framePieces[i].type == CORNER)
 		{
 			firstCornerIndex = i;
 			break;
@@ -432,7 +432,7 @@ void placeFramePieces(vector<Piece> framePieces)
 	{
 		solvedPuzzle(x, y) = framePieces[index];
 
-		if (framePieces[index].getPieceType() == CORNER) // change direction
+		if (framePieces[index].type == CORNER) // change direction
 		{
 			if (changeX == 0 && changeY == -1)
 			{
@@ -467,23 +467,23 @@ void alignFramePieces(vector<Piece> pieces)
 	for (int i = 0; i < pieces.size(); i++)
 	{
 		Piece p = pieces[i];
-		if (p.getPieceType() != FRAME)
+		if (p.type != FRAME)
 			continue;
 		int indexOfFlatEdge = 0;
 		for (indexOfFlatEdge = 0; indexOfFlatEdge < 4; indexOfFlatEdge++)
 		{
-			Edge e = p.getEdge(indexOfFlatEdge);
-			if (e.getEdgeType() == STRAIGHT)
+			Edge e = p.edges[indexOfFlatEdge];
+			if (e.edgetype == STRAIGHT)
 				break;
 		}
 		//shift edges to the left to make the flat edge be edge 0
 		for (int j = 0; j < indexOfFlatEdge; j++)
 		{
-			Edge tmp = p.getEdge(0);
-			p.setEdge(p.getEdge(1), 0);
-			p.setEdge(p.getEdge(2), 1);
-			p.setEdge(p.getEdge(3), 2);
-			p.setEdge(tmp, 3);
+			Edge tmp = p.edges[0];
+			p.edges[0] = p.edges[1];
+			p.edges[1] = p.edges[2];
+			p.edges[2] = p.edges[3];
+			p.edges[3] = tmp;
 		}
 	}
 }
@@ -493,26 +493,26 @@ void alignCornerPieces(vector<Piece> pieces)
 	for (int i = 0; i < pieces.size(); i++)
 	{
 		Piece p = pieces[i];
-		if (p.getPieceType() != CORNER)
+		if (p.type != CORNER)
 			continue;
 		int indexOfLastFlatEdge = 0;
 
 		for (indexOfLastFlatEdge = 0; indexOfLastFlatEdge < 4; indexOfLastFlatEdge++)
 		{
-			Edge e = p.getEdge(indexOfLastFlatEdge);
+			Edge e = p.edges[indexOfLastFlatEdge];
 
-			if (indexOfLastFlatEdge == 0 && e.getEdgeType() == STRAIGHT)
+			if (indexOfLastFlatEdge == 0 && e.edgetype == STRAIGHT)
 			{
-				if (p.getEdge(3).getEdgeType() == STRAIGHT)  //orientation is correct, break
+				if (p.edges[3].edgetype == STRAIGHT)  //orientation is correct, break
 					break;
-				else if (p.getEdge(1).getEdgeType() == STRAIGHT) //one left switch needed
+				else if (p.edges[1].edgetype == STRAIGHT) //one left switch needed
 				{
 					indexOfLastFlatEdge = 1;
 					break;
 				}
 			}
 
-			if (e.getEdgeType() == STRAIGHT)
+			if (e.edgetype == STRAIGHT)
 			{
 				indexOfLastFlatEdge++;
 				break;
@@ -521,11 +521,11 @@ void alignCornerPieces(vector<Piece> pieces)
 
 		for (int j = 0; j < indexOfLastFlatEdge; j++)
 		{
-			Edge tmp = pieces[i].getEdge(0);
-			pieces[i].setEdge(p.getEdge(1), 0);
-			pieces[i].setEdge(p.getEdge(2), 1);
-			pieces[i].setEdge(p.getEdge(3), 2);
-			pieces[i].setEdge(tmp, 3);
+			Edge tmp = pieces[i].edges[0];
+			pieces[i].edges[0] = p.edges[1];
+			pieces[i].edges[1] = p.edges[2];
+			pieces[i].edges[2] = p.edges[3];
+			pieces[i].edges[3] = tmp;
 		}
 	}
 }
@@ -538,7 +538,7 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 	list<Piece> interiorPiecesL;
 	for (int i = 0; i < pieces.size(); i++)
 	{
-		if (pieces[i].getPieceType() != INTERIOR)
+		if (pieces[i].type != INTERIOR)
 			framePiecesL.push_back(pieces[i]);
 		else 
 			interiorPiecesL.push_back(pieces[i]);
@@ -561,8 +561,8 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 		{
 			if (!solvedPuzzle(i, j).isInitialised)
 				continue;
-			startOfBlock.x = solvedPuzzle(i, j).getCentroid().x - 130;
-			startOfBlock.y = solvedPuzzle(i, j).getCentroid().y - 130;
+			startOfBlock.x = solvedPuzzle(i, j).centroid.x - 130;
+			startOfBlock.y = solvedPuzzle(i, j).centroid.y - 130;
 			if (startOfBlock.x < 0)
 				startOfBlock.x = 0;
 			if (startOfBlock.y < 0)

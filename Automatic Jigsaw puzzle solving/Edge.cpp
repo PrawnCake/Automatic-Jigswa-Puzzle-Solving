@@ -18,10 +18,6 @@ Edge::Edge(vector<Point> e, vector<Point> eActual, Mat img)
 	computeEdgeStrip(img);
 }
 
-Mat Edge::getEdgeStrip()
-{
-	return edgeStrip;
-}
 
 
 void Edge::computeEdgeStrip(Mat img)
@@ -227,21 +223,7 @@ void Edge::determineEdgeType()
 		edgetype = STRAIGHT;
 }
 
-EdgeType Edge::getEdgeType()
-{
-	return edgetype;
-}
 
-
-vector<Point> Edge::getContour()
-{
-	return edgePoints;
-}
-
-vector<Point>Edge::getActualContour()
-{
-	return actualEdgePoints;
-}
 Edge::~Edge()
 {
 }
