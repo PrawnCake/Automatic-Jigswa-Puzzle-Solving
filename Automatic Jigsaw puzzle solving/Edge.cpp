@@ -187,7 +187,7 @@ void Edge::determineEdgeType()
 	Point pointOfMaxDistance = edgePoints[maxPointIndex];
 	double gradientBetweenCorners;
 	double gradientCnr1ToPoint;
-	double threshold = 5;
+	double threshold = 3;
 
 	if (cnr1.x - cnr2.x != 0.0)
 		gradientBetweenCorners = atan((double)(cnr1.y - cnr2.y) / (double)(cnr1.x - cnr2.x));

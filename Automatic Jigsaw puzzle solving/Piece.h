@@ -20,6 +20,7 @@ public:
 	Point centroid;				//Centre point of the piece
 	PieceType type;				//Piece type
 	bool isInitialised = true;	//Used to keep track of Piece objects that are fully instantiated
+	int pieceID;
 
 	Edge * edges = new Edge[4];	//Array of the four edges that make up the piece
 	Edge left;					//Used to classify edges based on their orientation relative to the final solution grid after placement
