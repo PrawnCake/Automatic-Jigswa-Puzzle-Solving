@@ -177,9 +177,9 @@ void Edge::determineEdgeType()
 			maxDistance = fabs(distance);
 			maxPointIndex = i;
 			if (distance < 0)
-				side = 'V';
-			else
 				side = 'C';
+			else
+				side = 'V';
 		}
 	}
 	Point cnr1 = edgePoints[0];
@@ -187,24 +187,11 @@ void Edge::determineEdgeType()
 	Point pointOfMaxDistance = edgePoints[maxPointIndex];
 	double gradientBetweenCorners;
 	double gradientCnr1ToPoint;
-	double threshold = 3;
+	double threshold = 2;
 
-	if (cnr1.x - cnr2.x != 0.0)
-		gradientBetweenCorners = atan((double)(cnr1.y - cnr2.y) / (double)(cnr1.x - cnr2.x));
-	else
 
-		gradientBetweenCorners = CV_PI / 2.0; //90 degrees
-	if (cnr1.y > cnr2.y)
-		gradientBetweenCorners = -gradientBetweenCorners;
-
-	if (cnr1.x - pointOfMaxDistance.x != 0.0)
-		gradientCnr1ToPoint = atan((double)(cnr1.y - pointOfMaxDistance.y) / (double)(cnr1.x - pointOfMaxDistance.x));
-	else
-	{
-		gradientCnr1ToPoint = CV_PI / 2.0; //90 degrees
-		if (cnr1.y > pointOfMaxDistance.y)
-			gradientBetweenCorners = -gradientBetweenCorners;
-	}
+		gradientBetweenCorners = utility_CornerIdentificaion::findGradient(cnr1, cnr2);//atan((double)(cnr1.y - cnr2.y) / (double)(cnr1.x - cnr2.x));
+		gradientCnr1ToPoint = utility_CornerIdentificaion::findGradient(cnr1, pointOfMaxDistance);
 		
 
 
