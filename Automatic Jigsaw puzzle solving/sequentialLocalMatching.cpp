@@ -6,7 +6,7 @@ double sequentialLocalMatching::localMatchShape(Edge e1, Edge e2)
 	Mat edgeSideBySide(1000, 1000, CV_8UC3, Scalar(0, 0, 0));
 
 	if (e1.edgetype == e2.edgetype ) //edge types are the same, dont match
-		return 10000.0;
+		return 100000.0;
 	int pixelDiff = e1.edgePoints.size() - e2.edgePoints.size();
 	//cout << "Pixel count difference: " << e1.getContour().size() << " " << e2.getContour().size() << " " << pixelDiff << "\n";
 	
@@ -66,16 +66,38 @@ double sequentialLocalMatching::localMatchShape(Edge e1, Edge e2)
 
 double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 {
-	int longestApprox;
-
-	if (e1.edgeStrip.rows > e2.edgeStrip.rows)
-		longestApprox = e1.edgeStrip.rows;
+	int shortestStripLength;
+	int shortestSide;
+	if (e1.edgeStrip.rows < e2.edgeStrip.rows)
+	{
+		shortestStripLength = e1.edgeStrip.rows;
+		shortestSide = 1;
+	}	
 	else
-		longestApprox = e2.edgeStrip.rows;
-	Mat edgeSideBySide(longestApprox, e1.edgeStrip.cols * 2, CV_8UC3, Scalar(255, 255, 255));
+	{
+		shortestStripLength = e2.edgeStrip.rows;
+		shortestSide = 2;
+	}	
+
+	int difference = abs(e1.edgeStrip.rows - e2.edgeStrip.rows);
+
+
+	Mat edgeSideBySide(shortestStripLength, e1.edgeStrip.cols * 2, CV_8UC3, Scalar(255, 255, 255));
 	
-	e1.edgeStrip.copyTo(edgeSideBySide(Rect(0, 0, e1.edgeStrip.cols, e1.edgeStrip.rows)));
-	flip(e2.edgeStrip, edgeSideBySide(Rect(e1.edgeStrip.cols, 0, e2.edgeStrip.cols, e2.edgeStrip.rows)), 0);
+	if (shortestSide == 1)
+	{
+		e1.edgeStrip.copyTo(edgeSideBySide(Rect(0, 0, e1.edgeStrip.cols, e1.edgeStrip.rows)));
+		Mat tmp = e2.edgeStrip(Rect(0, (int)(round((double)(difference) / 2)), e1.edgeStrip.cols, shortestStripLength));
+		flip(tmp, edgeSideBySide(Rect(e1.edgeStrip.cols, 0, e2.edgeStrip.cols, shortestStripLength)), 0);
+	}
+
+	else if (shortestSide == 2)
+	{
+		e2.edgeStrip.copyTo(edgeSideBySide(Rect(0, 0, e2.edgeStrip.cols, e2.edgeStrip.rows)));
+		Mat tmp = e1.edgeStrip(Rect(0, (int)(round((double)(difference) / 2)), e2.edgeStrip.cols, shortestStripLength));
+		flip(tmp, edgeSideBySide(Rect(e2.edgeStrip.cols, 0, e1.edgeStrip.cols, shortestStripLength)), 0);
+	}
+
 	//
 	//namedWindow("sup", WINDOW_NORMAL);
 	//namedWindow("gray", WINDOW_NORMAL);
@@ -152,10 +174,10 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 
 	if (mostOccuringBinSignificant)
 	{
-		bestMatch = 9;
-		goodMatch = 3;
+		bestMatch = 7;
+		goodMatch = 5;
 		averageMatch = 2;
-		badMatch = -5;
+		badMatch = -10;
 	}
 
 	if (!mostOccuringBinSignificant)
@@ -163,7 +185,7 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 		bestMatch = 2;
 		goodMatch = 2;
 		averageMatch = 1;
-		badMatch = -5;
+		badMatch = -2;
 	}
 		
 	for (int i = 0; i < singlePixelComparison.rows; i++)

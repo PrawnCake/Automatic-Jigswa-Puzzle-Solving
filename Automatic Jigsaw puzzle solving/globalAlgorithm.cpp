@@ -1,10 +1,20 @@
 #include "globalAlgorithm.h"
 using namespace std;
 
-int length = 10;
-int bredth = 10;
+int length = 5;
+int bredth = 7;
 dlib::matrix<Piece> solvedPuzzle(length, bredth);
 
+
+double scoreTwoEdges(Edge e1, Edge e2)
+{
+	//double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2)*0.01;
+	double shapeScore = 0;
+	double imageScore = sequentialLocalMatching::localMatchImage(e1, e2);
+	//double imageScore = 100000;
+
+	return imageScore - shapeScore;
+}
 
 int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex, vector<Point> pockets, vector<Piece> pieces)
 {
@@ -42,7 +52,7 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 		ratioOfBestMatchedPiecePerPocket[i] = bestScore / secondBestScore;
 	}
 
-	int highestRatio = 0;
+	double highestRatio = 0;
 	int pocketWithHighestRatioIndex = 0;
 	int indexOfPiece = 0;
 	for (int i = 0; i < indexOfBestMatchedPiecePerPocket.size(); i++)
@@ -138,7 +148,7 @@ double matchTwoEdges(Edge e1, Edge e2, vector<int> edgesToMatch, Point pocket)
 		secondEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y + 1), 0);
 	}
 
-	return 5000 - (sequentialLocalMatching::localMatchShape(e1, firstEdge) + sequentialLocalMatching::localMatchShape(e2, secondEdge));
+	return (scoreTwoEdges(e1, firstEdge) + scoreTwoEdges(e2, secondEdge));
 }
 
 double matchThreeEdges(Edge e1, Edge e2, Edge e3, vector<int> edgesToMatch, Point pocket)
@@ -173,7 +183,7 @@ double matchThreeEdges(Edge e1, Edge e2, Edge e3, vector<int> edgesToMatch, Poin
 		thirdEdge	= getTheEdge(solvedPuzzle(pocket.x + 1, pocket.y), 1);
 	}
 
-	return 5000 - (sequentialLocalMatching::localMatchShape(e1, firstEdge) + sequentialLocalMatching::localMatchShape(e2, secondEdge) + sequentialLocalMatching::localMatchShape(e3, thirdEdge));
+	return (scoreTwoEdges(e1, firstEdge) + scoreTwoEdges(e2, secondEdge) + scoreTwoEdges(e3, thirdEdge));
 }
 
 vector<int> getNeighbouringEdgesIndex2(Point pocket)
@@ -287,7 +297,8 @@ vector<vector<Point>> findAllPockets()
 
 void placeInteriorPieces(vector<Piece> interiorPieces)
 {
-	while (interiorPieces.size() > 0)
+	int narnar = 0;
+	while (!(narnar++ == 1))
 	{
 		vector<vector<Point>> allPockets = findAllPockets();
 
@@ -297,7 +308,6 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 	
 		if (fourSidePockets.size() > 0) //last piece to be placed
 		{
-			//TODO
 			solvedPuzzle(fourSidePockets[0].x, fourSidePockets[0].y) = interiorPieces[0];
 			interiorPieces.erase(interiorPieces.begin());
 			return;
@@ -355,7 +365,8 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 				}
 			}
 
-			placeBestPiece(pocketScores, edgesToMatchIndex, twoSidePockets, interiorPieces);
+			int piecePlacedIndex = placeBestPiece(pocketScores, edgesToMatchIndex, twoSidePockets, interiorPieces);
+			interiorPieces.erase(interiorPieces.begin() + piecePlacedIndex);
 		}
 	}
 }
@@ -397,11 +408,11 @@ dlib::matrix<int> generateScoreMatrixForFramePieces(vector<Piece> framePieces)
 			}
 
 
-			//double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2);
+			//double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2)*0.01;
 			double shapeScore = 0;
-			double imageScore = 1000 - sequentialLocalMatching::localMatchImage(e1, e2);
-			//double imageScore = 0;
-			matrix(i, j) = 5000 - (int)(shapeScore + imageScore);
+			double imageScore = sequentialLocalMatching::localMatchImage(e1, e2);
+			//double imageScore = 100000;
+			matrix(i, j) = imageScore - shapeScore;
 		}
 	}
 	return matrix;
@@ -548,10 +559,10 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 	vector<Piece> interiorPieces = { begin(interiorPiecesL), end(interiorPiecesL) };
 
 	placeFramePieces(framePieces);
-	//placeInteriorPieces(interiorPieces);
+	placeInteriorPieces(interiorPieces);
 	
 	
-	int singleBlockDimention = 260;
+	int singleBlockDimention = 320;
 	Mat completePuzzleGrid(singleBlockDimention * (bredth), singleBlockDimention * (length), CV_8UC3, Scalar(255, 255, 255));
 
 	for (int i = 0; i < length; i++)
@@ -561,16 +572,17 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 		{
 			if (!solvedPuzzle(i, j).isInitialised)
 				continue;
-			startOfBlock.x = solvedPuzzle(i, j).centroid.x - 130;
-			startOfBlock.y = solvedPuzzle(i, j).centroid.y - 130;
+			startOfBlock.x = solvedPuzzle(i, j).centroid.x - 175;
+			startOfBlock.y = solvedPuzzle(i, j).centroid.y - 175;
 			if (startOfBlock.x < 0)
 				startOfBlock.x = 0;
 			if (startOfBlock.y < 0)
 				startOfBlock.y = 0;
 
-			img(Rect(startOfBlock.x, startOfBlock.y, 260, 260)).copyTo(completePuzzleGrid(Rect(i*singleBlockDimention, j*singleBlockDimention, singleBlockDimention, singleBlockDimention)));
+			img(Rect(startOfBlock.x, startOfBlock.y, 320, 320)).copyTo(completePuzzleGrid(Rect(i*singleBlockDimention, j*singleBlockDimention, singleBlockDimention, singleBlockDimention)));
 		}
 	}
+	namedWindow("final",WINDOW_NORMAL);
 	imshow("final", completePuzzleGrid);
 	
 	return solvedPuzzle;

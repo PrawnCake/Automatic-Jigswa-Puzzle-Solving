@@ -3,6 +3,42 @@
 using namespace std;
 using namespace cv;
 
+Point utility_CornerIdentificaion::findIntersectionPoint(Point p1, Point p2, Point p3, Point p4)
+{
+	float m1, c1, m2, c2;
+	float dx, dy;
+	float intersection_X, intersection_Y;
+
+	dx = p2.x - p1.x;
+	dy = p2.y - p1.y;
+	m1 = dy / dx;
+
+	// y = mx + c
+	// intercept c = y - mx
+
+	c1 = p1.y - m1 * p1.x; // which is same as y2 - slope * x2
+	dx = p4.x - p3.x;
+	dy = p4.y - p3.y;
+
+	m2 = dy / dx;
+	c2 = p4.y - m2 * p4.x; // which is same as y2 - slope * x2
+
+	if ((m1 - m2) == 0)
+
+		return Point(0,0);
+
+	else
+
+	{
+
+		intersection_X = (c2 - c1) / (m1 - m2);
+
+		intersection_Y = m1 * intersection_X + c1;
+
+		return Point((int)intersection_X, (int)intersection_Y);
+	}
+}
+
 double utility_CornerIdentificaion::findAngleBetween(Point pt1, Point pt2)
 {
 	double angle=0.0;
@@ -95,7 +131,7 @@ list<int> utility_CornerIdentificaion::findNextPotentialTrueCorners(vector<Point
 			return candidates;
 		}
 
-		if (!(euclideanDist(cnr1, cnr2) > approxWidth*0.7 && euclideanDist(cnr1, cnr2) < approxWidth*1.3)) //check if distance is within a threshold
+		if (!(euclideanDist(cnr1, cnr2) > approxWidth*0.75 && euclideanDist(cnr1, cnr2) < approxWidth*1.25)) //check if distance is within a threshold
 		{
 			cnr2Index = (cnr2Index + 1) % corners.size();
 			continue;
@@ -171,6 +207,11 @@ list<Point> utility_CornerIdentificaion::identifyTrueCorners(vector<Point> corne
 
 					if (!(cnr2cnr2 / cnr2cnr1 > 0.8 && cnr2cnr2 / cnr2cnr1 < 1.2))
 						continue;
+
+					double distIntersectToCentroid = utility_CornerIdentificaion::euclideanDist(centroid, utility_CornerIdentificaion::findIntersectionPoint(corners[cnr1Index], corners[cnr3Index], corners[cnr2Index], corners[cnr4Index]));
+					if (distIntersectToCentroid > 50)
+						continue;
+
 
 					bool cnr1check = corners[cnr1Index] == corners[cnr2Index] || corners[cnr1Index] == corners[cnr3Index] || corners[cnr1Index] == corners[cnr4Index];
 					bool cnr2check = corners[cnr2Index] == corners[cnr3Index] || corners[cnr2Index] == corners[cnr4Index];

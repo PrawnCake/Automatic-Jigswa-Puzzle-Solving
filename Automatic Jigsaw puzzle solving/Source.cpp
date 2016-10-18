@@ -61,33 +61,33 @@ void initialise()
 	namedWindow("Original1", WINDOW_NORMAL);
 	imshow("Original1", combined1);
 	
-	namedWindow("Original2", WINDOW_NORMAL);
-	imshow("Original2", combined2);
+	//namedWindow("Original2", WINDOW_NORMAL);
+	//imshow("Original2", combined2);
 
 	subtract(gray2, gray1, edited);
 
-	namedWindow("Original",WINDOW_NORMAL);
-	imshow("Original", img);
+	//namedWindow("Original",WINDOW_NORMAL);
+	//imshow("Original", img);
 
-	namedWindow("GrayScale Image");
-	imshow("GrayScale Image", edited);
+	//namedWindow("GrayScale Image");
+	//imshow("GrayScale Image", edited);
 
 	threshold(edited, edited, 15, 255, THRESH_BINARY);
 
-	namedWindow("Threshold Image");
-	imshow("Threshold Image", edited);
+	//namedWindow("Threshold Image");
+	//imshow("Threshold Image", edited);
 
 	erode(edited, edited, Mat(), Point(-1, -1), 3);
 	dilate(edited, edited, Mat(), Point(-1, -1), 3);
 
-	namedWindow("Erode Dialate Image 2", WINDOW_NORMAL);
-	imshow("Erode Dialate Image 2", edited);
+	//namedWindow("Erode Dialate Image 2", WINDOW_NORMAL);
+	//imshow("Erode Dialate Image 2", edited);
 
 	dilate(edited, edited, Mat(), Point(-1, -1), 2);
 	erode(edited, edited, Mat(), Point(-1, -1), 2);
 
-	namedWindow("Dialate Erode Image", WINDOW_NORMAL);
-	imshow("Dialate Erode Image", edited);
+	//namedWindow("Dialate Erode Image", WINDOW_NORMAL);
+	//imshow("Dialate Erode Image", edited);
 
 	//img = imread("C:/Users/g11f0364/Desktop/Puzzles/BlackPuzzle.jpg");
 
@@ -135,6 +135,11 @@ void getContoursAndCorners()
 		}
 	}
 
+	for (int i = 0; i < contours.size(); i++)
+	{
+		reverse(contours[i].begin(), contours[i].end());
+	}
+
 	double averageAreaOfPiece = 0;
 	
 	vector<vector<Point> > polyApprox(contours.size());
@@ -146,7 +151,7 @@ void getContoursAndCorners()
 		if (fabs(contourArea(contours[i]))>1000 && fabs(contourArea(contours[i])) < 500000)
 		{
 			approxPolyDP(contours[i], polyApprox[i], 15.0, true);
-			drawContours(img, polyApprox, i, color, 5, 8, hierarchy, 0, Point());
+			//drawContours(img, polyApprox, i, color, 5, 8, hierarchy, 0, Point());
 			averageAreaOfPiece += contourArea(contours[i]);
 			Piece p(img,i);
 			puzzle.push_back(p);
@@ -192,22 +197,22 @@ void getContoursAndCorners()
 		{
 			word = "Frm";
 		}
-		putText(img, word, Point(centroid.x-25,centroid.y-25), FONT_HERSHEY_SIMPLEX, 2, Scalar(0, 0, 0), 3);
+		//putText(img, word, Point(centroid.x-25,centroid.y-25), FONT_HERSHEY_SIMPLEX, 2, Scalar(0, 0, 0), 3);
 		putText(img, to_string(i),centroid, FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
 		
 
 		int numPotentialCorners = potentialCorners.size();
 		for (int j = 0; j < numPotentialCorners; j++)
 		{
-			circle(img, potentialCorners.front(), 10, cvScalar(0, 255, 255), 2, 8, 0);
-			putText(img, to_string(j), potentialCorners.front(), FONT_HERSHEY_SIMPLEX, 2, cvScalar(255, 255, 255),3);
+			//circle(img, potentialCorners.front(), 10, cvScalar(0, 255, 255), 2, 8, 0);
+			//putText(img, to_string(j), potentialCorners.front(), FONT_HERSHEY_SIMPLEX, 2, cvScalar(255, 255, 255),3);
 			potentialCorners.pop_front();
 		}
 
 		for (int j = 0; j < trueCornersV.size(); j++)
 		{
-			circle(img, trueCornersV[j], 20, cvScalar(255, 0, 255), 3, 8, 0);
-			putText(img, to_string(j), trueCornersV[j], FONT_HERSHEY_SIMPLEX, 3, cvScalar(0, 0, 0),4);
+			//circle(img, trueCornersV[j], 20, cvScalar(255, 0, 255), 3, 8, 0);
+			//putText(img, to_string(j), trueCornersV[j], FONT_HERSHEY_SIMPLEX, 3, cvScalar(0, 0, 0),4);
 		}
 	}
 }
@@ -217,7 +222,7 @@ int main()
 	dlib::matrix<Piece> solvedPuzzle(4,4);
 	initialise();
 	getContoursAndCorners();
-	//globalAlgorithm::solvePuzzle(puzzleV, img);
+	globalAlgorithm::solvePuzzle(puzzleV, img);
 
 	namedWindow("Contours",WINDOW_NORMAL);
 	imshow("Contours", img);

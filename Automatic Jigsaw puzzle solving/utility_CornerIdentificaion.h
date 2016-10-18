@@ -19,6 +19,7 @@ public:
 	static double euclideanDist(Point& p, Point& q);
 	static double findGradient(Point pt1, Point pt2);
 	static double findAngleBetween(Point pt1, Point pt2);
+	static Point findIntersectionPoint(Point p1, Point p2, Point p3, Point p4);
 private:
 	static list<int> findNextPotentialTrueCorners(vector<Point> corners, Point centroid, int initialPointIndex, int approxWidth);
 };

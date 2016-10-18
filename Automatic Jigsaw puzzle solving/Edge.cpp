@@ -24,7 +24,7 @@ void Edge::computeEdgeStrip(Mat img)
 {
 	Mat imgCopy;
 	img.copyTo(imgCopy);
-	int pixelDepth = 3;
+	int pixelDepth = 10;
 	int yIncrement = 0;
 	vector<Point> contour = actualEdgePoints;
 	Mat edgeImage(contour.size(), pixelDepth, CV_8UC3, Scalar(255, 255, 255));
@@ -65,6 +65,7 @@ void Edge::computeEdgeStrip(Mat img)
 		}
 		yIncrement += (int)utility_CornerIdentificaion::euclideanDist(pt1, pt2);
 	}
+	namedWindow("area scanned", WINDOW_NORMAL);
 	imshow("area scanned",imgCopy);
 
 	int r = 0;
@@ -177,9 +178,9 @@ void Edge::determineEdgeType()
 			maxDistance = fabs(distance);
 			maxPointIndex = i;
 			if (distance < 0)
-				side = 'C';
-			else
 				side = 'V';
+			else
+				side = 'C';
 		}
 	}
 	Point cnr1 = edgePoints[0];
