@@ -68,7 +68,8 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 {
 	int shortestStripLength;
 	int shortestSide;
-	if (e1.edgetype == e2.edgetype)
+	
+if (e1.edgetype == e2.edgetype)
 		return -10000;
 
 	if (e1.edgeStrip.rows < e2.edgeStrip.rows)
@@ -113,7 +114,7 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 	imshow("gray", edgeSideBySide);
 	
 	
-	int paletIndex = 6;
+	int paletIndex = 8;
 	int* paletBinEdge1 = new int[paletIndex];
 	int* paletBinEdge2 = new int[paletIndex];
 	Mat singlePixelComparison(edgeSideBySide.rows, 2, CV_8UC1);
@@ -177,18 +178,18 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 
 	if (mostOccuringBinSignificant)
 	{
-		bestMatch = 7;
-		goodMatch = 5;
-		averageMatch = 2;
-		badMatch = -10;
+		bestMatch = 15;
+		goodMatch = 6;
+		averageMatch = 6;
+		badMatch = -3;
 	}
 
 	if (!mostOccuringBinSignificant)
 	{
-		bestMatch = 2;
-		goodMatch = 2;
-		averageMatch = 1;
-		badMatch = -2;
+		bestMatch = 6;
+		goodMatch = 6;
+		averageMatch = 4;
+		badMatch = -3;
 	}
 		
 	for (int i = 0; i < singlePixelComparison.rows; i++)

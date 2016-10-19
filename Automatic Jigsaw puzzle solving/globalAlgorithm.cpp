@@ -16,7 +16,7 @@ double scoreTwoEdges(Edge e1, Edge e2)
 	return imageScore - shapeScore;
 }
 
-int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex, vector<Point> pockets, vector<Piece> pieces)
+int placeBestPiece(vector<vector<double>> scores, vector<vector<int>> edgesToMatchIndexList, vector<Point> pockets, vector<Piece> pieces)
 {
 	vector<int> indexOfBestMatchedPiecePerPocket(scores.size());
 	vector<double> ratioOfBestMatchedPiecePerPocket(scores.size());
@@ -24,8 +24,8 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 	//find the best piece per pocket, i = pocket, j = piece (note 4 orientations per piece)
 	for (int i = 0; i < scores.size(); i++)
 	{
-		double bestScore = 0;
-		double secondBestScore = 0;
+		double bestScore = -10000;
+		double secondBestScore = -10000;
 		int bestScoreIndex = 0;
 
 		
@@ -71,7 +71,7 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 	int orientation = indexOfPiece % 4;
 
 	//orientate Piece
-	if (edgesToMatchIndex[0] == 0)
+	if (edgesToMatchIndexList[pocketWithHighestRatioIndex][0] == 0)
 	{
 		p.down	= p.edges[orientation];
 		p.right = p.edges[(orientation + 1) % 4];
@@ -79,7 +79,7 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 		p.left	= p.edges[(orientation + 3) % 4];
 	}
 
-	else if (edgesToMatchIndex[0] == 1)
+	else if (edgesToMatchIndexList[pocketWithHighestRatioIndex][0] == 1)
 	{
 		p.right = p.edges[orientation];
 		p.up	= p.edges[(orientation + 1) % 4];
@@ -87,7 +87,7 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 		p.down	= p.edges[(orientation + 3) % 4];
 	}
 
-	else if (edgesToMatchIndex[0] == 2)
+	else if (edgesToMatchIndexList[pocketWithHighestRatioIndex][0] == 2)
 	{
 		p.up	= p.edges[orientation];
 		p.left	= p.edges[(orientation + 1) % 4];
@@ -95,7 +95,7 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 		p.right = p.edges[(orientation + 3) % 4];
 	}
 
-	else if (edgesToMatchIndex[0] == 3)
+	else if (edgesToMatchIndexList[pocketWithHighestRatioIndex][0] == 3)
 	{
 		p.left	= p.edges[orientation];
 		p.down	= p.edges[(orientation + 1) % 4];
@@ -112,11 +112,11 @@ Edge getTheEdge(Piece thePiece, int edge)
 		return thePiece.edges[2];
 	
 	if (edge == 0)
-		return thePiece.up;
+		return thePiece.down;
 	if (edge == 1)
 		return thePiece.left;
 	if (edge == 2)
-		return thePiece.down;
+		return thePiece.up;
 	if (edge == 3)
 		return thePiece.right;
 }
@@ -183,8 +183,10 @@ double matchThreeEdges(Edge e1, Edge e2, Edge e3, vector<int> edgesToMatch, Poin
 		secondEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y + 1), 0);
 		thirdEdge	= getTheEdge(solvedPuzzle(pocket.x + 1, pocket.y), 1);
 	}
-
-	return (scoreTwoEdges(e1, firstEdge) + scoreTwoEdges(e2, secondEdge) + scoreTwoEdges(e3, thirdEdge));
+	double score1 = scoreTwoEdges(e1, firstEdge);
+	double score2 = scoreTwoEdges(e2, secondEdge);
+	double score3 = scoreTwoEdges(e3, thirdEdge);
+	return (score1 + score2 + score3);
 }
 
 vector<int> getNeighbouringEdgesIndex2(Point pocket)
@@ -300,7 +302,7 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 {
 	
 	int blehbleh = 0;
-	while (!(blehbleh++ ==3))
+	while (!(blehbleh++ ==15))
 	{
 		vector<vector<Point>> allPockets = findAllPockets();
 
@@ -322,6 +324,7 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 			{
 				pocketScores[i] = vector<double>(interiorPieces.size() * 4);
 			}
+			vector<vector<int>> edgesToMatchIndexList;
 			vector<int> edgesToMatchIndex;
 			for (int i = 0; i < threeSidePockets.size(); i++)
 			{
@@ -329,7 +332,7 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 
 				//this is used to determine which edges (in terms of up down left right) are matched, as currently the orientation of the interior piece relative to the frame is unknown
 				edgesToMatchIndex = getNeighbouringEdgesIndex3(pocket);
-
+				edgesToMatchIndexList.push_back(edgesToMatchIndex);
 				for (int j = 0; j < interiorPieces.size(); j++)
 				{
 					for (int k = 0; k < 4; k++)
@@ -341,7 +344,7 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 				}
 			}
 
-			int piecePlacedIndex = placeBestPiece(pocketScores, edgesToMatchIndex, threeSidePockets, interiorPieces);
+			int piecePlacedIndex = placeBestPiece(pocketScores, edgesToMatchIndexList, threeSidePockets, interiorPieces);
 			interiorPieces.erase(interiorPieces.begin() + piecePlacedIndex);
 		}
 
@@ -353,13 +356,14 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 				pocketScores[i] = vector<double>(interiorPieces.size() * 4);
 			}
 			vector<int> edgesToMatchIndex;
+			vector<vector<int>> edgesToMatchIndexList;
 			for (int i = 0; i < twoSidePockets.size(); i++)
 			{
 				Point pocket = twoSidePockets[i];
 
 				//this is used to determine which edges (in terms of up down left right) are matched, as currently the orientation of the interior piece relative to the frame is unknown
 				edgesToMatchIndex = getNeighbouringEdgesIndex2(pocket);
-
+				edgesToMatchIndexList.push_back(edgesToMatchIndex);
 				for (int j = 0; j < interiorPieces.size(); j++)
 				{
 					for (int k = 0; k < 4; k++)
@@ -371,7 +375,7 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 				}
 			}
 
-			int piecePlacedIndex = placeBestPiece(pocketScores, edgesToMatchIndex, twoSidePockets, interiorPieces);
+			int piecePlacedIndex = placeBestPiece(pocketScores, edgesToMatchIndexList, twoSidePockets, interiorPieces);
 			interiorPieces.erase(interiorPieces.begin() + piecePlacedIndex);
 		}
 	}
