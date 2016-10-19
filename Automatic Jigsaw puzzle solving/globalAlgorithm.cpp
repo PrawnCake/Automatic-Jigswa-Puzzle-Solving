@@ -50,6 +50,7 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 		}
 		indexOfBestMatchedPiecePerPocket[i] = bestScoreIndex;
 		ratioOfBestMatchedPiecePerPocket[i] = bestScore / secondBestScore;
+		cout << "Piece matched: " << pieces[bestScoreIndex/4].pieceID << endl;
 	}
 
 	double highestRatio = 0;
@@ -66,8 +67,8 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 	}
 	//Place piece
 	Piece p = pieces[indexOfPiece/4];
+
 	int orientation = indexOfPiece % 4;
-	solvedPuzzle(pockets[pocketWithHighestRatioIndex].x, pockets[pocketWithHighestRatioIndex].y) = p;
 
 	//orientate Piece
 	if (edgesToMatchIndex[0] == 0)
@@ -101,7 +102,7 @@ int placeBestPiece(vector<vector<double>> scores, vector<int> edgesToMatchIndex,
 		p.right = p.edges[(orientation + 2) % 4];
 		p.up	= p.edges[(orientation + 3) % 4];
 	}
-
+	solvedPuzzle(pockets[pocketWithHighestRatioIndex].x, pockets[pocketWithHighestRatioIndex].y) = p;
 	return indexOfPiece / 4;
 }
 
@@ -169,14 +170,14 @@ double matchThreeEdges(Edge e1, Edge e2, Edge e3, vector<int> edgesToMatch, Poin
 		thirdEdge	= getTheEdge(solvedPuzzle(pocket.x - 1, pocket.y), 3);
 	}
 
-	else if (edgesToMatch[0] == 2 && edgesToMatch[1] == 3 && edgesToMatch[2] == 4)
+	else if (edgesToMatch[0] == 2 && edgesToMatch[1] == 3 && edgesToMatch[2] == 0)
 	{
 		firstEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y - 1), 2);
 		secondEdge	= getTheEdge(solvedPuzzle(pocket.x - 1, pocket.y), 3);
 		thirdEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y + 1), 0);
 	}
 
-	else if (edgesToMatch[0] == 3 && edgesToMatch[1] == 0 && edgesToMatch[2] == 3)
+	else if (edgesToMatch[0] == 3 && edgesToMatch[1] == 0 && edgesToMatch[2] == 1)
 	{
 		firstEdge	= getTheEdge(solvedPuzzle(pocket.x - 1, pocket.y), 3);
 		secondEdge	= getTheEdge(solvedPuzzle(pocket.x, pocket.y + 1), 0);
@@ -227,7 +228,7 @@ vector<int> getNeighbouringEdgesIndex3(Point pocket)
 	Piece p2 = solvedPuzzle(pocket.x, pocket.y + 1);
 	Piece p3 = solvedPuzzle(pocket.x + 1, pocket.y);
 
-	if (p1.isInitialised && p2.isInitialised)
+	if (p1.isInitialised && p2.isInitialised && p3.isInitialised)
 	{
 		return vector<int> {3, 0, 1};
 	}
@@ -237,7 +238,7 @@ vector<int> getNeighbouringEdgesIndex3(Point pocket)
 	p3 = solvedPuzzle(pocket.x, pocket.y - 1);
 
 
-	if (p1.isInitialised && p2.isInitialised)
+	if (p1.isInitialised && p2.isInitialised && p3.isInitialised)
 	{
 		return vector<int> {0, 1, 2};
 	}
@@ -246,7 +247,7 @@ vector<int> getNeighbouringEdgesIndex3(Point pocket)
 	p2 = solvedPuzzle(pocket.x, pocket.y - 1);
 	p3 = solvedPuzzle(pocket.x - 1, pocket.y);
 
-	if (p1.isInitialised && p2.isInitialised)
+	if (p1.isInitialised && p2.isInitialised && p3.isInitialised)
 	{
 		return vector<int> {1, 2, 3};
 	}
@@ -255,7 +256,7 @@ vector<int> getNeighbouringEdgesIndex3(Point pocket)
 	p2 = solvedPuzzle(pocket.x - 1, pocket.y);
 	p3 = solvedPuzzle(pocket.x, pocket.y + 1);
 
-	if (p1.isInitialised && p2.isInitialised)
+	if (p1.isInitialised && p2.isInitialised && p3.isInitialised)
 	{
 		return vector<int> {2, 3, 0};
 	}
@@ -297,8 +298,9 @@ vector<vector<Point>> findAllPockets()
 
 void placeInteriorPieces(vector<Piece> interiorPieces)
 {
-	int narnar = 0;
-	while (!(narnar++ == 1))
+	
+	int blehbleh = 0;
+	while (!(blehbleh++ ==3))
 	{
 		vector<vector<Point>> allPockets = findAllPockets();
 
@@ -332,7 +334,9 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 				{
 					for (int k = 0; k < 4; k++)
 					{
-						pocketScores[i][j * 4 + k] = matchThreeEdges(interiorPieces[j].edges[k], interiorPieces[j].edges[(k + 1) % 4], interiorPieces[j].edges[(k + 2) % 4], edgesToMatchIndex, pocket);
+						double score = matchThreeEdges(interiorPieces[j].edges[k], interiorPieces[j].edges[(k + 1) % 4], interiorPieces[j].edges[(k + 2) % 4], edgesToMatchIndex, pocket);
+						pocketScores[i][j * 4 + k] = score;
+						cout << "Piece: " << interiorPieces[j].pieceID << " Orientation: " << k << " Score: " << score << endl;
 					}
 				}
 			}
@@ -360,7 +364,9 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 				{
 					for (int k = 0; k < 4; k++)
 					{
-						pocketScores[i][j * 4 + k] = matchTwoEdges(interiorPieces[j].edges[k], interiorPieces[j].edges[(k + 1) % 4], edgesToMatchIndex, pocket);
+						double score = matchTwoEdges(interiorPieces[j].edges[k], interiorPieces[j].edges[(k + 1) % 4], edgesToMatchIndex, pocket);
+						pocketScores[i][j * 4 + k] = score;
+						cout << "Piece: " << interiorPieces[j].pieceID << " Orientation: " << k << " Score: " << score << endl;
 					}
 				}
 			}
@@ -560,7 +566,6 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 
 	placeFramePieces(framePieces);
 	placeInteriorPieces(interiorPieces);
-	
 	
 	int singleBlockDimention = 320;
 	Mat completePuzzleGrid(singleBlockDimention * (bredth), singleBlockDimention * (length), CV_8UC3, Scalar(255, 255, 255));

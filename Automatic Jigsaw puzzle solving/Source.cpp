@@ -198,7 +198,7 @@ void getContoursAndCorners()
 			word = "Frm";
 		}
 		//putText(img, word, Point(centroid.x-25,centroid.y-25), FONT_HERSHEY_SIMPLEX, 2, Scalar(0, 0, 0), 3);
-		putText(img, to_string(i),centroid, FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 3);
+		//putText(img, to_string(i),centroid, FONT_HERSHEY_SIMPLEX, 2, Scalar(0, 0, 0), 3);
 		
 
 		int numPotentialCorners = potentialCorners.size();
@@ -226,6 +226,8 @@ int main()
 
 	namedWindow("Contours",WINDOW_NORMAL);
 	imshow("Contours", img);
+
+//	sequentialLocalMatching::localMatchImage(puzzleV[26].edges[0], puzzleV[32].edges[2]);
 
 	cvWaitKey(0); //wait for a key press
 	//cleaning up

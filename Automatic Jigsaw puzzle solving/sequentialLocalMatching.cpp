@@ -68,6 +68,9 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 {
 	int shortestStripLength;
 	int shortestSide;
+	if (e1.edgetype == e2.edgetype)
+		return -10000;
+
 	if (e1.edgeStrip.rows < e2.edgeStrip.rows)
 	{
 		shortestStripLength = e1.edgeStrip.rows;
@@ -99,18 +102,18 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 	}
 
 	//
-	//namedWindow("sup", WINDOW_NORMAL);
-	//namedWindow("gray", WINDOW_NORMAL);
-	//namedWindow("singlePixel", WINDOW_NORMAL);
-	//namedWindow("singlePixelResult", WINDOW_NORMAL);
-	//namedWindow("beforegray", WINDOW_NORMAL);
+	namedWindow("sup", WINDOW_NORMAL);
+	namedWindow("gray", WINDOW_NORMAL);
+	namedWindow("singlePixel", WINDOW_NORMAL);
+	namedWindow("singlePixelResult", WINDOW_NORMAL);
+	namedWindow("beforegray", WINDOW_NORMAL);
 
-	//imshow("beforegray", edgeSideBySide);
+	imshow("beforegray", edgeSideBySide);
 	cvtColor(edgeSideBySide, edgeSideBySide, CV_BGR2GRAY);
-	//imshow("gray", edgeSideBySide);
+	imshow("gray", edgeSideBySide);
 	
 	
-	int paletIndex = 4;
+	int paletIndex = 6;
 	int* paletBinEdge1 = new int[paletIndex];
 	int* paletBinEdge2 = new int[paletIndex];
 	Mat singlePixelComparison(edgeSideBySide.rows, 2, CV_8UC1);
@@ -146,7 +149,7 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 			}
 		}
 	}
-	//imshow("singlePixel", singlePixelComparison);
+	imshow("singlePixel", singlePixelComparison);
 	
 	
 	//Score match
@@ -219,8 +222,8 @@ double sequentialLocalMatching::localMatchImage(Edge e1, Edge e2)
 	
 	
 	
-	//imshow("sup", edgeSideBySide);
-	//imshow("singlePixelResult", result);
+	imshow("sup", edgeSideBySide);
+	imshow("singlePixelResult", result);
 
 	return score;
 }
