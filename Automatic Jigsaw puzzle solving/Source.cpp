@@ -11,7 +11,7 @@
 #include "sequentialLocalMatching.h"
 #include "utility_CornerIdentificaion.h"
 #include "globalAlgorithm.h"
-#include <dlib/optimization/max_cost_assignment.h>"
+#include <dlib/optimization/max_cost_assignment.h>
 
 using namespace std;
 using namespace cv;

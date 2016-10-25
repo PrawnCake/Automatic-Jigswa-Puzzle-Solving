@@ -1,8 +1,8 @@
 #include "globalAlgorithm.h"
 using namespace std;
 
-int length = 5;
-int bredth = 7;
+const int length = 5;
+const int bredth = 7;
 dlib::matrix<Piece> solvedPuzzle(length, bredth);
 
 
@@ -383,8 +383,8 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 
 dlib::matrix<int> generateScoreMatrixForFramePieces(vector<Piece> framePieces)
 {
-
-	dlib::matrix<int> matrix(framePieces.size(), framePieces.size());
+	const int fp = framePieces.size();
+	dlib::matrix<int> matrix(fp, fp);
 
 	for (int i = 0; i < framePieces.size(); i++)
 	{
@@ -430,7 +430,7 @@ dlib::matrix<int> generateScoreMatrixForFramePieces(vector<Piece> framePieces)
 
 void placeFramePieces(vector<Piece> framePieces)
 {
-	dlib::matrix<int> matrix = generateScoreMatrixForFramePieces(framePieces);
+	const dlib::matrix<int> matrix = generateScoreMatrixForFramePieces(framePieces);
 	vector<long> optimalAssignmentOfFramePieces = dlib::max_cost_assignment(matrix);
 
 	//place frame pieces
