@@ -1,4 +1,5 @@
 #include "globalAlgorithm.h"
+
 using namespace std;
 
 const int length = 5;
@@ -11,6 +12,7 @@ double scoreTwoEdges(Edge e1, Edge e2)
 	//double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2)*0.01;
 	double shapeScore = 0;
 	double imageScore = sequentialLocalMatching::localMatchImage(e1, e2);
+	//double imageScore = parallelLocalMatching::localMatchImage(e1, e2);
 	//double imageScore = 100000;
 
 	return imageScore - shapeScore;

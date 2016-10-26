@@ -1,8 +1,8 @@
 #include "parallelLocalMatching.h"
 
-extern "C" int runParallelMatch(int *edge1, int *edge2, int dataSize);
+extern "C" int* runParallelMatch(int *edge1, int *edge2, int dataSize, bool signifBin, int bin);
 
-int parallelLocalMatching::calcScoreParallel(Edge e1, Edge e2)
+int parallelLocalMatching::localMatchImage(Edge e1, Edge e2)
 {
 	int shortestStripLength;
 	int shortestSide;
@@ -40,15 +40,86 @@ int parallelLocalMatching::calcScoreParallel(Edge e1, Edge e2)
 		flip(tmp, edgeSideBySide(Rect(e2.edgeStrip.cols, 0, e1.edgeStrip.cols, shortestStripLength)), 0);
 	}
 	
+	int paletIndex = 8;
+	int* paletBinEdge1 = new int[paletIndex];
+	int* paletBinEdge2 = new int[paletIndex];
+	Mat singlePixelComparison(edgeSideBySide.rows, 2, CV_8UC1);
+
+	for (int i = 0; i < paletIndex; i++)
+	{
+		paletBinEdge1[i] = 0;
+		paletBinEdge2[i] = 0;
+	}
+
+	for (int j = 0; j < edgeSideBySide.rows; j++)
+	{
+		int valueEdge1 = edgeSideBySide.at<uchar>(Point((edgeSideBySide.cols / 2) - 1, j));
+		int valueEdge2 = edgeSideBySide.at<uchar>(Point((edgeSideBySide.cols / 2), j));
+
+		for (int k = 0; k < paletIndex; k++)
+		{
+			if (valueEdge1 < (k + 1) * (256 / paletIndex))
+			{
+				singlePixelComparison.at<uchar>(Point(0, j)) = k*(256 / paletIndex);
+				paletBinEdge1[k]++;
+				break;
+			}
+		}
+
+		for (int k = 0; k < paletIndex; k++)
+		{
+			if (valueEdge2 < (k + 1) * (256 / paletIndex))
+			{
+				singlePixelComparison.at<uchar>(Point(1, j)) = k*(256 / paletIndex);
+				paletBinEdge2[k]++;
+				break;
+			}
+		}
+	}
+
+	int mostOccuringBinIndex1 = 0;
+	int mostOccuringBinIndex2 = 0;
+	bool mostOccuringBinSignificant = false;
+
+	for (int i = 0; i < paletIndex; i++)
+	{
+		if (paletBinEdge1[i] > paletBinEdge1[mostOccuringBinIndex1])
+			mostOccuringBinIndex1 = i;
+		if (paletBinEdge2[i] > paletBinEdge1[mostOccuringBinIndex2])
+			mostOccuringBinIndex2 = i;
+	}
+
+	if (mostOccuringBinIndex1 == mostOccuringBinIndex2 && (paletBinEdge1[mostOccuringBinIndex1] > singlePixelComparison.rows *0.5 && paletBinEdge1[mostOccuringBinIndex2] > singlePixelComparison.rows *0.5))
+		mostOccuringBinSignificant = true;
 
 	vector<int> e1Vec;
 	vector<int> e2Vec;
-	int *e1Arr;
-	int *e2Arr;
+
 	for (int i = 0; i < edgeSideBySide.rows; i++)
 	{
-
+		e1Vec.push_back(edgeSideBySide.at<uchar>(Point(0, i)));
+		e2Vec.push_back(edgeSideBySide.at<uchar>(Point(1, i)));
 	}
-	
-	return 1;
+	int *e1Arr = &e1Vec[0];
+	int *e2Arr = &e2Vec[0];
+
+	int *score;
+
+	if (mostOccuringBinSignificant)
+	{
+		score = runParallelMatch(e1Arr, e2Arr, edgeSideBySide.rows, true, mostOccuringBinIndex1);
+	}
+	else
+	{
+		score = runParallelMatch(e1Arr, e2Arr, edgeSideBySide.rows, false, mostOccuringBinIndex1);
+	}
+
+	int total = 0;
+
+	for (int i = 0; i < edgeSideBySide.rows; i++)
+	{
+		total += score[i];
+	}
+
+	return total;
 }

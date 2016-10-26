@@ -180,7 +180,7 @@ if (e1.edgetype == e2.edgetype)
 	{
 		bestMatch = 15;
 		goodMatch = 6;
-		averageMatch = 6;
+		averageMatch = 4;
 		badMatch = -3;
 	}
 
