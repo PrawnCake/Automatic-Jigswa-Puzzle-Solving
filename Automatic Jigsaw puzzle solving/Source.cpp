@@ -35,23 +35,26 @@ Point findCentroid(vector<Point> contour)
 
 void initialise()
 {
-	Mat img1 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/set1black.jpg");
-	Mat img2 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/set1white.jpg");
-	Mat img3 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/set2black.jpg");
-	Mat img4 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/set2white.jpg");
+	//Mat img1 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/set1black.jpg");
+	//Mat img2 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/set1white.jpg");
+	//Mat img3 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/set2black.jpg");
+	//Mat img4 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/set2white.jpg");
 	
-	Mat combined1(img1.rows, img1.cols+img3.cols, CV_8UC3, Scalar(255, 255, 255));
-	Mat	combined2(img2.rows, img2.cols+img4.cols, CV_8UC3, Scalar(255, 255, 255));
+	//Mat combined1(img1.rows, img1.cols+img3.cols, CV_8UC3, Scalar(255, 255, 255));
+	//Mat	combined2(img2.rows, img2.cols+img4.cols, CV_8UC3, Scalar(255, 255, 255));
+
+	Mat combined1 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/cruiseBlack.png");
+	Mat combined2 = imread("C:/Users/g11f0364/Desktop/scanned puzzles/cruiseWhite.png");
 
 	combined1.copyTo(img);
 
-	img1.copyTo(combined1(Rect(0, 0, img1.cols, img1.rows)));
-	img3.copyTo(combined1(Rect(img1.cols, 0, img3.cols, img3.rows)));
+	//img1.copyTo(combined1(Rect(0, 0, img1.cols, img1.rows)));
+	//img3.copyTo(combined1(Rect(img1.cols, 0, img3.cols, img3.rows)));
 
-	img2.copyTo(combined2(Rect(0, 0, img2.cols, img2.rows)));
-	img4.copyTo(combined2(Rect(img2.cols, 0, img4.cols, img4.rows)));
+	//img2.copyTo(combined2(Rect(0, 0, img2.cols, img2.rows)));
+	//img4.copyTo(combined2(Rect(img2.cols, 0, img4.cols, img4.rows)));
 
-	combined2.copyTo(img);
+	//combined2.copyTo(img);
 
 	Mat gray1, gray2;
 
@@ -61,62 +64,33 @@ void initialise()
 	namedWindow("Original1", WINDOW_NORMAL);
 	imshow("Original1", combined1);
 	
-	//namedWindow("Original2", WINDOW_NORMAL);
-	//imshow("Original2", combined2);
+	namedWindow("Original2", WINDOW_NORMAL);
+	imshow("Original2", combined2);
 
 	subtract(gray2, gray1, edited);
 
-	//namedWindow("Original",WINDOW_NORMAL);
-	//imshow("Original", img);
+	namedWindow("Original",WINDOW_NORMAL);
+	imshow("Original", img);
 
-	//namedWindow("GrayScale Image");
-	//imshow("GrayScale Image", edited);
+	namedWindow("GrayScale Image", WINDOW_NORMAL);
+	imshow("GrayScale Image", edited);
 
 	threshold(edited, edited, 15, 255, THRESH_BINARY);
 
-	//namedWindow("Threshold Image");
-	//imshow("Threshold Image", edited);
+	namedWindow("Threshold Image", WINDOW_NORMAL);
+	imshow("Threshold Image", edited);
 
 	erode(edited, edited, Mat(), Point(-1, -1), 3);
 	dilate(edited, edited, Mat(), Point(-1, -1), 3);
 
-	//namedWindow("Erode Dialate Image 2", WINDOW_NORMAL);
-	//imshow("Erode Dialate Image 2", edited);
+	namedWindow("Erode Dialate Image 1", WINDOW_NORMAL);
+	imshow("Erode Dialate Image 1", edited);
 
 	dilate(edited, edited, Mat(), Point(-1, -1), 2);
 	erode(edited, edited, Mat(), Point(-1, -1), 2);
 
-	//namedWindow("Dialate Erode Image", WINDOW_NORMAL);
-	//imshow("Dialate Erode Image", edited);
-
-	//img = imread("C:/Users/g11f0364/Desktop/Puzzles/BlackPuzzle.jpg");
-
-	//cvtColor(img, edited, CV_BGR2GRAY);
-
-	//threshold(edited, edited, 15, 255, THRESH_BINARY);
-
-	//namedWindow("Threshold Image");
-	//imshow("Threshold Image", edited);
-
-	//erode(edited, edited, Mat());
-	//dilate(edited, edited, Mat());
-
-	//namedWindow("Erode Dialate Image", WINDOW_NORMAL);
-	//imshow("Erode Dialate Image", edited);
-
-	//dilate(edited, edited, Mat());
-	//erode(edited, edited, Mat());
-
-	//namedWindow("Dialate Erode Image", WINDOW_NORMAL);
-	//imshow("Dialate Erode Image", edited);
-
-	//erode(edited, edited, Mat(), Point(-1, -1), 2);
-	//dilate(edited, edited, Mat(), Point(-1, -1), 2);
-
-	//namedWindow("Erode Dialate Image 2", WINDOW_NORMAL);
-	//imshow("Erode Dialate Image 2", edited);
-
-
+	namedWindow("Erode Dialate Image 2", WINDOW_NORMAL);
+	imshow("Erode Dialate Image 2", edited);
 }
 
 void getContoursAndCorners()
@@ -148,10 +122,10 @@ void getContoursAndCorners()
 	{
 		Scalar color = Scalar(255, 255, 0);
 
-		if (fabs(contourArea(contours[i]))>1000 && fabs(contourArea(contours[i])) < 500000)
+		if (fabs(contourArea(contours[i]))>1000 && fabs(contourArea(contours[i])) < 700000)
 		{
-			approxPolyDP(contours[i], polyApprox[i], 15.0, true);
-			//drawContours(img, polyApprox, i, color, 5, 8, hierarchy, 0, Point());
+			approxPolyDP(contours[i], polyApprox[i], 5.0, true);
+			drawContours(img, polyApprox, i, color, 3, 8, hierarchy, 0, Point());
 			averageAreaOfPiece += contourArea(contours[i]);
 			Piece p(img,i);
 			puzzle.push_back(p);
@@ -167,51 +141,44 @@ void getContoursAndCorners()
 		potentialCorners = utility_CornerIdentificaion::identifyCorners(polyApprox[i]);
 		vector<Point> potentialCornersV = { begin(potentialCorners), end(potentialCorners) };
 		Point centroid = findCentroid(contours[i]);
-		circle(img, centroid, 10, cvScalar(255, 0, 255), -1);
+		//circle(img, centroid, 10, cvScalar(255, 0, 255), -1);
 
 
 		trueCorners = utility_CornerIdentificaion::identifyTrueCorners(potentialCornersV, findCentroid(contours[i]), sqrt(averageAreaOfPiece));
 		vector<Point> trueCornersV = { begin(trueCorners), end(trueCorners) };
 
-		if (i == 7)
-		{
-			cout << "hi";
-		}
-
-		puzzleV[i].createEdges(trueCornersV, contours[i]);
-		puzzleV[i].centroid = centroid;
+		//puzzleV[i].createEdges(trueCornersV, contours[i]);
+		//puzzleV[i].centroid = centroid;
 		
 		
-		string word;
-		if (puzzleV[i].type == INTERIOR)
-		{
-			word = "In";
-		}
+		//string word;
+		//if (puzzleV[i].type == INTERIOR)
+		//{
+		//	word = "In";
+		//}
 
-		else if (puzzleV[i].type == CORNER)
-		{
-			word = "Cnr";
-		}
+		//else if (puzzleV[i].type == CORNER)
+		//{
+		//	word = "Cnr";
+		//}
 
-		else if (puzzleV[i].type == FRAME)
-		{
-			word = "Frm";
-		}
+		//else if (puzzleV[i].type == FRAME)
+		//{
+		//	word = "Frm";
+		//}
 		//putText(img, word, Point(centroid.x-25,centroid.y-25), FONT_HERSHEY_SIMPLEX, 2, Scalar(0, 0, 0), 3);
 		//putText(img, to_string(i),centroid, FONT_HERSHEY_SIMPLEX, 2, Scalar(0, 0, 0), 3);
 		
-
-		int numPotentialCorners = potentialCorners.size();
-		for (int j = 0; j < numPotentialCorners; j++)
+		for (int j = 0; j < potentialCornersV.size(); j++)  //draw the potential corners on the pieces
 		{
-			//circle(img, potentialCorners.front(), 10, cvScalar(0, 255, 255), 2, 8, 0);
-			//putText(img, to_string(j), potentialCorners.front(), FONT_HERSHEY_SIMPLEX, 2, cvScalar(255, 255, 255),3);
-			potentialCorners.pop_front();
+			circle(img, potentialCornersV[j], 3, cvScalar(0, 255, 255), 2, 8, 0);
+			//putText(img, to_string(j), potentialCornersV[j], FONT_HERSHEY_SIMPLEX, 2, cvScalar(255, 255, 255), 3);
+
 		}
 
-		for (int j = 0; j < trueCornersV.size(); j++)
+		for (int j = 0; j < trueCornersV.size(); j++) //draw the true corners on the pieces
 		{
-			//circle(img, trueCornersV[j], 20, cvScalar(255, 0, 255), 3, 8, 0);
+			circle(img, trueCornersV[j], 6, cvScalar(255, 0, 255), 2, 8, 0);
 			//putText(img, to_string(j), trueCornersV[j], FONT_HERSHEY_SIMPLEX, 3, cvScalar(0, 0, 0),4);
 		}
 	}
@@ -219,15 +186,16 @@ void getContoursAndCorners()
 
 int main()
 {
-	dlib::matrix<Piece> solvedPuzzle(4,4);
+
 	initialise();
 	getContoursAndCorners();
-	globalAlgorithm::solvePuzzle(puzzleV, img);
+	//globalAlgorithm::solvePuzzle(puzzleV, img);
 
 	namedWindow("Contours",WINDOW_NORMAL);
 	imshow("Contours", img);
 
-//	sequentialLocalMatching::localMatchImage(puzzleV[26].edges[0], puzzleV[32].edges[2]);
+	//namedWindow("Contours", WINDOW_NORMAL);
+	//imshow("Contours", puzzleV[16].edges[2].edgeStrip);
 
 	cvWaitKey(0); //wait for a key press
 	//cleaning up

@@ -2,7 +2,7 @@
 #include "Piece.h"
 #include "sequentialLocalMatching.h"
 #include <dlib/optimization/max_cost_assignment.h>"
-#include "parallelLocalMatching.h"
+#include "utility_CornerIdentificaion.h"
 
 class globalAlgorithm
 {

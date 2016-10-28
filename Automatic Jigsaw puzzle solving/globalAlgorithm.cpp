@@ -2,15 +2,15 @@
 
 using namespace std;
 
-const int length = 5;
-const int bredth = 7;
+const int length = 3;
+const int bredth = 4;
 dlib::matrix<Piece> solvedPuzzle(length, bredth);
 
 
 double scoreTwoEdges(Edge e1, Edge e2)
 {
-	//double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2)*0.01;
-	double shapeScore = 0;
+	double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2)*0.1;
+	//double shapeScore = 0;
 	double imageScore = sequentialLocalMatching::localMatchImage(e1, e2);
 	//double imageScore = parallelLocalMatching::localMatchImage(e1, e2);
 	//double imageScore = 100000;
@@ -26,8 +26,8 @@ int placeBestPiece(vector<vector<double>> scores, vector<vector<int>> edgesToMat
 	//find the best piece per pocket, i = pocket, j = piece (note 4 orientations per piece)
 	for (int i = 0; i < scores.size(); i++)
 	{
-		double bestScore = -10000;
-		double secondBestScore = -10000;
+		double bestScore = -30000;
+		double secondBestScore = -30000;
 		int bestScoreIndex = 0;
 
 		
@@ -40,7 +40,7 @@ int placeBestPiece(vector<vector<double>> scores, vector<vector<int>> edgesToMat
 				bestScoreIndex = j;
 			}
 		}
-		if (secondBestScore == 0)
+		if (secondBestScore == -30000)
 		{
 			for (int j = 0; j < scores[i].size(); j++)
 			{
@@ -51,8 +51,14 @@ int placeBestPiece(vector<vector<double>> scores, vector<vector<int>> edgesToMat
 			}
 		}
 		indexOfBestMatchedPiecePerPocket[i] = bestScoreIndex;
+		if (bestScore >= 0 && secondBestScore < 0)
+		{
+			bestScore += abs(secondBestScore);
+			secondBestScore = abs(secondBestScore);
+		}
+			
 		ratioOfBestMatchedPiecePerPocket[i] = bestScore / secondBestScore;
-		cout << "Piece matched: " << pieces[bestScoreIndex/4].pieceID << endl;
+		//cout << "Piece matched: " << pieces[bestScoreIndex/4].pieceID << endl;
 	}
 
 	double highestRatio = 0;
@@ -314,8 +320,34 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 	
 		if (fourSidePockets.size() > 0) //last piece to be placed
 		{
-			solvedPuzzle(fourSidePockets[0].x, fourSidePockets[0].y) = interiorPieces[0];
-			interiorPieces.erase(interiorPieces.begin());
+			vector<vector<double>> pocketScores(fourSidePockets.size());
+			for (int i = 0; i < fourSidePockets.size(); i++)
+			{
+				pocketScores[i] = vector<double>(interiorPieces.size() * 4);
+			}
+			vector<vector<int>> edgesToMatchIndexList;
+			vector<int> edgesToMatchIndex;
+			for (int i = 0; i < fourSidePockets.size(); i++)
+			{
+				Point pocket = fourSidePockets[i];
+
+				//this is used to determine which edges (in terms of up down left right) are matched, as currently the orientation of the interior piece relative to the frame is unknown
+				edgesToMatchIndex = {0,1,2,3};
+				edgesToMatchIndexList.push_back(edgesToMatchIndex);
+				for (int j = 0; j < interiorPieces.size(); j++)
+				{
+					for (int k = 0; k < 4; k++)
+					{
+						double score = scoreTwoEdges(interiorPieces[j].edges[k], getTheEdge(solvedPuzzle(pocket.x, pocket.y+1), 0)) + scoreTwoEdges(interiorPieces[j].edges[(k + 1) % 3], getTheEdge(solvedPuzzle(pocket.x+1, pocket.y), 1)) + scoreTwoEdges(interiorPieces[j].edges[(k + 2) % 3], getTheEdge(solvedPuzzle(pocket.x, pocket.y-1), 2)) + scoreTwoEdges(interiorPieces[j].edges[(k + 3) % 3], getTheEdge(solvedPuzzle(pocket.x-1, pocket.y), 3));
+						pocketScores[i][j * 4 + k] = score;
+						//cout << "Piece: " << interiorPieces[j].pieceID << " Orientation: " << k << " Score: " << score << endl;
+					}
+				}
+			}
+
+			int piecePlacedIndex = placeBestPiece(pocketScores, edgesToMatchIndexList, fourSidePockets, interiorPieces);
+			interiorPieces.erase(interiorPieces.begin() + piecePlacedIndex);
+
 			return;
 		}
 
@@ -341,7 +373,7 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 					{
 						double score = matchThreeEdges(interiorPieces[j].edges[k], interiorPieces[j].edges[(k + 1) % 4], interiorPieces[j].edges[(k + 2) % 4], edgesToMatchIndex, pocket);
 						pocketScores[i][j * 4 + k] = score;
-						cout << "Piece: " << interiorPieces[j].pieceID << " Orientation: " << k << " Score: " << score << endl;
+						//cout << "Piece: " << interiorPieces[j].pieceID << " Orientation: " << k << " Score: " << score << endl;
 					}
 				}
 			}
@@ -372,7 +404,7 @@ void placeInteriorPieces(vector<Piece> interiorPieces)
 					{
 						double score = matchTwoEdges(interiorPieces[j].edges[k], interiorPieces[j].edges[(k + 1) % 4], edgesToMatchIndex, pocket);
 						pocketScores[i][j * 4 + k] = score;
-						cout << "Piece: " << interiorPieces[j].pieceID << " Orientation: " << k << " Score: " << score << endl;
+						//cout << "Piece: " << interiorPieces[j].pieceID << " Orientation: " << k << " Score: " << score << endl;
 					}
 				}
 			}
@@ -573,8 +605,8 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 	placeFramePieces(framePieces);
 	placeInteriorPieces(interiorPieces);
 	
-	int singleBlockDimention = 320;
-	Mat completePuzzleGrid(singleBlockDimention * (bredth), singleBlockDimention * (length), CV_8UC3, Scalar(255, 255, 255));
+	int singleBlockDimention = 230;
+	Mat completePuzzleMat(singleBlockDimention * (bredth), singleBlockDimention * (length), CV_8UC3, Scalar(130, 130, 130));
 
 	for (int i = 0; i < length; i++)
 	{
@@ -583,18 +615,79 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 		{
 			if (!solvedPuzzle(i, j).isInitialised)
 				continue;
-			startOfBlock.x = solvedPuzzle(i, j).centroid.x - 175;
-			startOfBlock.y = solvedPuzzle(i, j).centroid.y - 175;
+			startOfBlock.x = solvedPuzzle(i, j).centroid.x - singleBlockDimention / 2;
+			startOfBlock.y = solvedPuzzle(i, j).centroid.y - singleBlockDimention / 2;
 			if (startOfBlock.x < 0)
 				startOfBlock.x = 0;
 			if (startOfBlock.y < 0)
 				startOfBlock.y = 0;
 
-			img(Rect(startOfBlock.x, startOfBlock.y, 320, 320)).copyTo(completePuzzleGrid(Rect(i*singleBlockDimention, j*singleBlockDimention, singleBlockDimention, singleBlockDimention)));
+			Mat piece;
+			Mat pieceRotated;
+			img(Rect(startOfBlock.x, startOfBlock.y, singleBlockDimention, singleBlockDimention)).copyTo(piece);
+
+			double gradient;
+
+			if (!(solvedPuzzle(i, j).type == INTERIOR))
+			{
+				gradient = utility_CornerIdentificaion::findGradient(solvedPuzzle(i, j).edges[0].actualEdgePoints[0], solvedPuzzle(i, j).edges[0].actualEdgePoints[solvedPuzzle(i, j).edges[0].actualEdgePoints.size() - 1]);
+				gradient = gradient * 180 / CV_PI;
+				Mat rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), gradient,1);
+
+				warpAffine(piece, pieceRotated, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+				if (i == 0 && j == 0)
+				{
+					Mat tmp;
+					rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), -90, 1);
+
+					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+					tmp.copyTo(pieceRotated);
+				}
+
+				else if (j == 0)
+				{
+					Mat tmp;
+					rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), 180, 1);
+
+					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+					tmp.copyTo(pieceRotated);
+				}
+
+				else if (i == 0 && j != 0 && j != bredth-1)
+				{
+					Mat tmp;
+					rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), -90, 1);
+
+					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+					tmp.copyTo(pieceRotated);
+				}
+
+				else if (i == length-1 && j != 0)
+				{
+					Mat tmp;
+					rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), 90, 1);
+
+					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+					tmp.copyTo(pieceRotated);
+				}
+			}
+			else
+			{
+				gradient = utility_CornerIdentificaion::findGradient(solvedPuzzle(i, j).down.actualEdgePoints[0], solvedPuzzle(i, j).down.actualEdgePoints[solvedPuzzle(i, j).down.actualEdgePoints.size() - 1]);
+				gradient = gradient * 180 / CV_PI;
+				Mat rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), gradient, 1);
+
+				warpAffine(piece, pieceRotated, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+
+				
+			}
+
+			pieceRotated.copyTo(completePuzzleMat(Rect(i*singleBlockDimention, j*singleBlockDimention, singleBlockDimention, singleBlockDimention)));
+
 		}
 	}
 	namedWindow("final",WINDOW_NORMAL);
-	imshow("final", completePuzzleGrid);
+	imshow("final", completePuzzleMat);
 	
 	return solvedPuzzle;
 }

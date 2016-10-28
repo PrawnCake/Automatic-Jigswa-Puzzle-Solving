@@ -103,15 +103,13 @@ if (e1.edgetype == e2.edgetype)
 	}
 
 	//
-	namedWindow("sup", WINDOW_NORMAL);
-	namedWindow("gray", WINDOW_NORMAL);
-	namedWindow("singlePixel", WINDOW_NORMAL);
+	namedWindow("grayEdges", WINDOW_NORMAL);
+	namedWindow("indexedEdges", WINDOW_NORMAL);
 	namedWindow("singlePixelResult", WINDOW_NORMAL);
 	namedWindow("beforegray", WINDOW_NORMAL);
 
 	imshow("beforegray", edgeSideBySide);
 	cvtColor(edgeSideBySide, edgeSideBySide, CV_BGR2GRAY);
-	imshow("gray", edgeSideBySide);
 	
 	
 	int paletIndex = 8;
@@ -150,7 +148,7 @@ if (e1.edgetype == e2.edgetype)
 			}
 		}
 	}
-	imshow("singlePixel", singlePixelComparison);
+	imshow("indexedEdges", singlePixelComparison);
 	
 	
 	//Score match
@@ -223,7 +221,7 @@ if (e1.edgetype == e2.edgetype)
 	
 	
 	
-	imshow("sup", edgeSideBySide);
+	imshow("grayEdges", edgeSideBySide);
 	imshow("singlePixelResult", result);
 
 	return score;
