@@ -2,15 +2,15 @@
 
 using namespace std;
 
-const int length = 3;
-const int bredth = 4;
+const int length = 5;
+const int bredth = 7;
 dlib::matrix<Piece> solvedPuzzle(length, bredth);
 
 
 double scoreTwoEdges(Edge e1, Edge e2)
 {
-	double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2)*0.1;
-	//double shapeScore = 0;
+	//double shapeScore = sequentialLocalMatching::localMatchShape(e1, e2)*0.1;
+	double shapeScore = 0;
 	double imageScore = sequentialLocalMatching::localMatchImage(e1, e2);
 	//double imageScore = parallelLocalMatching::localMatchImage(e1, e2);
 	//double imageScore = 100000;
@@ -472,7 +472,7 @@ void placeFramePieces(vector<Piece> framePieces)
 	int changeY = -1;
 	int x = 0;
 	int y = 0;
-	int firstCornerIndex;
+	int firstCornerIndex = 0;
 	for (int i = 0; i < framePieces.size(); i++) // find first corner
 	{
 		if (framePieces[i].type == CORNER)
@@ -605,8 +605,8 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 	placeFramePieces(framePieces);
 	placeInteriorPieces(interiorPieces);
 	
-	int singleBlockDimention = 230;
-	Mat completePuzzleMat(singleBlockDimention * (bredth), singleBlockDimention * (length), CV_8UC3, Scalar(130, 130, 130));
+	int singleBlockDimention = 360;
+	Mat completePuzzleMat(singleBlockDimention * (bredth), singleBlockDimention * (length), CV_8UC3, Scalar(0, 0, 0));
 
 	for (int i = 0; i < length; i++)
 	{
@@ -634,13 +634,13 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 				gradient = gradient * 180 / CV_PI;
 				Mat rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), gradient,1);
 
-				warpAffine(piece, pieceRotated, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+				warpAffine(piece, pieceRotated, rotationMatrix, Size(piece.cols, piece.rows), 1);
 				if (i == 0 && j == 0)
 				{
 					Mat tmp;
 					rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), -90, 1);
 
-					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1);
 					tmp.copyTo(pieceRotated);
 				}
 
@@ -649,7 +649,7 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 					Mat tmp;
 					rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), 180, 1);
 
-					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1);
 					tmp.copyTo(pieceRotated);
 				}
 
@@ -658,7 +658,7 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 					Mat tmp;
 					rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), -90, 1);
 
-					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1);
 					tmp.copyTo(pieceRotated);
 				}
 
@@ -667,7 +667,7 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 					Mat tmp;
 					rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), 90, 1);
 
-					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+					warpAffine(pieceRotated, tmp, rotationMatrix, Size(piece.cols, piece.rows), 1);
 					tmp.copyTo(pieceRotated);
 				}
 			}
@@ -677,7 +677,7 @@ dlib::matrix<Piece> globalAlgorithm::solvePuzzle(vector<Piece> pieces, Mat img)
 				gradient = gradient * 180 / CV_PI;
 				Mat rotationMatrix = getRotationMatrix2D(Point(piece.cols / 2, piece.rows / 2), gradient, 1);
 
-				warpAffine(piece, pieceRotated, rotationMatrix, Size(piece.cols, piece.rows), 1, BORDER_TRANSPARENT);
+				warpAffine(piece, pieceRotated, rotationMatrix, Size(piece.cols, piece.rows), 1);
 
 				
 			}

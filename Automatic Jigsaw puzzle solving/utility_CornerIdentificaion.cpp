@@ -79,7 +79,7 @@ list<Point> utility_CornerIdentificaion::identifyCorners(vector<Point> contours)
 	double gradient1Theta = 0;
 	double gradient2Theta = 0;
 	double angle;
-	double angleThreshold = 30;
+	double angleThreshold = 20;
 
 	for (int i = 0; i < contours.size(); i++)
 	{

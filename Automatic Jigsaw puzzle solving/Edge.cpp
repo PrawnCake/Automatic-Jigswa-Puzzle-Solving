@@ -24,7 +24,7 @@ void Edge::computeEdgeStrip(Mat img)
 {
 	Mat imgCopy;
 	img.copyTo(imgCopy);
-	int pixelDepth = 3;
+	int pixelDepth = 5;
 	int yIncrement = 0;
 	vector<Point> contour = actualEdgePoints;
 	Mat edgeImage(contour.size(), pixelDepth, CV_8UC3, Scalar(255, 255, 255));

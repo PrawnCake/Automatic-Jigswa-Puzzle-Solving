@@ -218,9 +218,6 @@ if (e1.edgetype == e2.edgetype)
 		}
 	}
 	
-	
-	
-	
 	imshow("grayEdges", edgeSideBySide);
 	imshow("singlePixelResult", result);
 
